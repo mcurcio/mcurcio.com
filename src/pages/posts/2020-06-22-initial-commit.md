@@ -1,5 +1,4 @@
 ---
-templateKey: 'blog-post'
 title: 'initial commit'
 date: 2020-06-22T19:43:10.000Z
 featuredpost: true

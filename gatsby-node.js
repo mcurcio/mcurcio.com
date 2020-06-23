@@ -3,7 +3,7 @@ const path = require('path')
 const { createFilePath } = require('gatsby-source-filesystem')
 const { fmImagesToRelative } = require('gatsby-remark-relative-images')
 
-const BLOG_DIR = path.join(__dirname, 'src', 'pages', 'blog');
+const POSTS_DIR = path.join(__dirname, 'src', 'pages', 'posts');
 
 exports.createPages = ({ actions, graphql }) => {
   const { createPage } = actions
@@ -40,12 +40,12 @@ exports.createPages = ({ actions, graphql }) => {
         path: edge.node.fields.slug,
         tags: edge.node.frontmatter.tags,
         component: path.resolve(
-          `src/templates/${String(edge.node.frontmatter.templateKey)}.js`
+          `src/templates/${String(edge.node.frontmatter.templateKey || 'blog-post')}.js`
         ),
         // additional data can be passed via context
         context: {
           id,
-//		  slug: edge.node.fields.slug
+		  slug: edge.node.fields.slug
         },
       })
     })
@@ -85,22 +85,22 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
 
     let slug = createFilePath({ node, getNode, trailingSlash: false })
 
-	if (node.fileAbsolutePath.startsWith(BLOG_DIR)) {
+	if (node.fileAbsolutePath.startsWith(POSTS_DIR)) {
 		const dateString = slug.slice(1, 11);
 		const title = slug.slice(12);
 
-		slug = `/blog/${dateString.slice(0, 4)}/${dateString.slice(5, 7)}/${title}`;
+		slug = `/${dateString.slice(0, 4)}/${dateString.slice(5, 7)}/${title}`;
 
 		//const date = Date.parse(node.frontmatter.date);
-/*
+
 		createNodeField({
-			name: 'date',
+			name: 'type',
 			node,
-			value: node.frontmatter.date
+			value: 'post'
 		});
-*/
 	}
 
+	console.log('*'.repeat(40) + ' slug: ' + slug);
     createNodeField({
       name: `slug`,
       node,
