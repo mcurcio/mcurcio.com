@@ -3,6 +3,8 @@ const path = require('path')
 const { createFilePath } = require('gatsby-source-filesystem')
 const { fmImagesToRelative } = require('gatsby-remark-relative-images')
 
+const BLOG_DIR = path.join(__dirname, 'src', 'pages', 'blog');
+
 exports.createPages = ({ actions, graphql }) => {
   const { createPage } = actions
 
@@ -33,6 +35,7 @@ exports.createPages = ({ actions, graphql }) => {
 
     posts.forEach((edge) => {
       const id = edge.node.id
+	  console.log('*'.repeat(40) + ' page', edge.node.fields.slug)
       createPage({
         path: edge.node.fields.slug,
         tags: edge.node.frontmatter.tags,
@@ -42,6 +45,7 @@ exports.createPages = ({ actions, graphql }) => {
         // additional data can be passed via context
         context: {
           id,
+//		  slug: edge.node.fields.slug
         },
       })
     })
@@ -77,11 +81,30 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
   fmImagesToRelative(node) // convert image paths for gatsby images
 
   if (node.internal.type === `MarkdownRemark`) {
-    const value = createFilePath({ node, getNode })
+	  //console.log('node', node);
+
+    let slug = createFilePath({ node, getNode, trailingSlash: false })
+
+	if (node.fileAbsolutePath.startsWith(BLOG_DIR)) {
+		const dateString = slug.slice(1, 11);
+		const title = slug.slice(12);
+
+		slug = `/blog/${dateString.slice(0, 4)}/${dateString.slice(5, 7)}/${title}`;
+
+		//const date = Date.parse(node.frontmatter.date);
+/*
+		createNodeField({
+			name: 'date',
+			node,
+			value: node.frontmatter.date
+		});
+*/
+	}
+
     createNodeField({
       name: `slug`,
       node,
-      value,
+      value: slug
     })
   }
 }
