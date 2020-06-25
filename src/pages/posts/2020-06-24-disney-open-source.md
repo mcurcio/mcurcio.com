@@ -5,6 +5,7 @@ description: This is the story of my attempt to open source a library at the
   worlds largest entertainment company.
 featuredpost: true
 featuredimage: /img/disneycareers-header.jpg
+draft: true
 tags:
   - disney
   - open source

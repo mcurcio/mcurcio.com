@@ -12,7 +12,7 @@ import PreviewCompatibleImage from '../components/PreviewCompatibleImage';
 function PostDeckCard({post}) {
 	console.log('PostDeckCard', post);
 
-	return <div className="card" style={{width: '18rem'}}>
+	return <div>
     {/*}<img className="card-img-top" src="..." alt="Card image cap" />*/}
 	<PreviewCompatibleImage
 	  imageInfo={{
@@ -36,7 +36,7 @@ function PostDeck({posts}) {
 	console.log('PostDeck', posts);
 
 	return <div className="row">
-		{posts.map(post => <div className="col-3">
+		{posts.map(post => <div className="col-4 align-items-stretch">
 			<PostDeckCard post={post.node} />
 		</div>)}
 	</div>;
@@ -173,7 +173,7 @@ fragment Posts on MarkdownRemarkConnection {
         featuredpost
         featuredimage {
           childImageSharp {
-            fluid(maxWidth: 260, quality: 100) {
+            fluid(maxWidth: 400, maxHeight: 300, quality: 100) {
               ...GatsbyImageSharpFluid
             }
           }
@@ -190,13 +190,13 @@ fragment Posts on MarkdownRemarkConnection {
       }
     }
 
-	recent_posts: allMarkdownRemark(sort: {order: DESC, fields: [frontmatter___date]}, limit: 4, filter: {fields: {type: {eq: "post"}}, frontmatter: {}}) {
+	recent_posts: allMarkdownRemark(sort: {order: DESC, fields: [frontmatter___date]}, limit: 3, filter: {fields: {type: {eq: "post"}}, frontmatter: {draft: {ne: true}}}) {
     ...Posts
   }
 
 	home_automation: allMarkdownRemark(
 		sort: { order: DESC, fields: [frontmatter___date] }
-		limit: 4
+		limit: 3
 		filter: { fields: { type: { eq: "post" } }, frontmatter: {tags: {in: "home automation"}} }
 	  ) {
 		...Posts
