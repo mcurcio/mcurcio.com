@@ -21,7 +21,7 @@ const TemplateWrapper = ({ hero, children }) => {
           sizes="180x180"
           href={`${withPrefix('/')}img/apple-touch-icon.png`}
         />
-        <link
+        {/*}<link
           rel="icon"
           type="image/png"
           href={`${withPrefix('/')}img/favicon-32x32.png`}
@@ -32,6 +32,12 @@ const TemplateWrapper = ({ hero, children }) => {
           type="image/png"
           href={`${withPrefix('/')}img/favicon-16x16.png`}
           sizes="16x16"
+        />*/}
+		<link
+          rel="icon"
+          type="image/png"
+          href={`${withPrefix('/')}img/favicon-256x256.png`}
+          sizes="256x256"
         />
 
         <link

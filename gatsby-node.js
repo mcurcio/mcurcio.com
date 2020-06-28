@@ -59,10 +59,12 @@ exports.createPages = ({ actions, graphql }) => {
     posts.forEach((edge) => {
 		console.log('tags', edge.node.frontmatter);
 		if (!edge.node.frontmatter.draft) {
-      if (_.get(edge, `node.frontmatter.tags`)) {
-        tags = tags.concat(edge.node.frontmatter.tags)
-      }
-  }
+			if (_.get(edge, `node.frontmatter.tags`)) {
+				tags = tags.concat(edge.node.frontmatter.tags)
+			}
+		} else {
+			console.log('skipping tags', edge.node.frontmatter.tags);
+		}
     })
     // Eliminate duplicate tags
     tags = _.uniq(tags)
