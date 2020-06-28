@@ -18,6 +18,7 @@ exports.createPages = ({ actions, graphql }) => {
               slug
             }
             frontmatter {
+				draft
               tags
               templateKey
             }
@@ -36,30 +37,36 @@ exports.createPages = ({ actions, graphql }) => {
     posts.forEach((edge) => {
       const id = edge.node.id
 	  console.log('*'.repeat(40) + ' page', edge.node.fields.slug)
-      createPage({
-        path: edge.node.fields.slug,
-        tags: edge.node.frontmatter.tags,
-        component: path.resolve(
-          `src/templates/${String(edge.node.frontmatter.templateKey || 'blog-post')}.js`
-        ),
-        // additional data can be passed via context
-        context: {
-          id,
-		  slug: edge.node.fields.slug
-        },
-      })
+	  if (!edge.node.frontmatter.draft) {
+	      createPage({
+	        path: edge.node.fields.slug,
+	        tags: edge.node.frontmatter.tags,
+	        component: path.resolve(
+	          `src/templates/${String(edge.node.frontmatter.templateKey || 'blog-post')}.js`
+	        ),
+	        // additional data can be passed via context
+	        context: {
+	          id,
+			  slug: edge.node.fields.slug
+	        },
+		});
+	}
     })
 
     // Tag pages:
     let tags = []
     // Iterate through each post, putting all found tags into `tags`
     posts.forEach((edge) => {
+		console.log('tags', edge.node.frontmatter);
+		if (!edge.node.frontmatter.draft) {
       if (_.get(edge, `node.frontmatter.tags`)) {
         tags = tags.concat(edge.node.frontmatter.tags)
       }
+  }
     })
     // Eliminate duplicate tags
     tags = _.uniq(tags)
+	console.log('all tags', tags);
 
     // Make tag pages
     tags.forEach((tag) => {
@@ -86,8 +93,13 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
     let slug = createFilePath({ node, getNode, trailingSlash: false })
 
 	if (node.fileAbsolutePath.startsWith(POSTS_DIR)) {
-		const dateString = slug.slice(1, 11);
-		const title = slug.slice(12);
+		const PREFIX = '/posts/';
+
+		console.log('computing slug from', slug);
+		const dateString = slug.slice(PREFIX.length+0, PREFIX.length+10);
+		const title = slug.slice(PREFIX.length+11);
+		console.log('dateString', dateString);
+		console.log('title', title);
 
 		slug = `/${dateString.slice(0, 4)}/${dateString.slice(5, 7)}/${title}`;
 

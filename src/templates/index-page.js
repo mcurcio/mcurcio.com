@@ -14,16 +14,19 @@ function PostDeckCard({post}) {
 
 	return <div>
     {/*}<img className="card-img-top" src="..." alt="Card image cap" />*/}
-	<PreviewCompatibleImage
-	  imageInfo={{
-		image: post.frontmatter.featuredimage,
-		alt: `featured image thumbnail for post ${post.frontmatter.title}`,
-	  }}
-	/>
+	<Link href={post.fields.slug}>
+		<PreviewCompatibleImage
+		  imageInfo={{
+			image: post.frontmatter.featuredimage,
+			alt: `featured image thumbnail for post ${post.frontmatter.title}`,
+		  }}
+		/>
+	</Link>
+
     <div className="card-body">
 	<small className="text-muted">{post.frontmatter.date}</small>
 
-      <h5 className="card-title">{post.frontmatter.title}</h5>
+      <h5 className="card-title"><Link href={post.fields.slug} style={{color:'inherit'}}>{post.frontmatter.title}</Link></h5>
 
       <p className="card-text">{post.frontmatter.description}</p>
 	  <Link href={post.fields.slug}>Continue reading</Link>
@@ -56,6 +59,16 @@ function PostCategory({name, posts}) {
 	</>;
 }
 
+function Hero() {
+	return <section id="hero" className="jumbotron">
+		<h1 className="title">
+			Hi, my name is <span className="text-color-primary">Matt</span>
+			<br />
+			and I like to automate <em>everything</em>
+		</h1>
+	</section>;
+}
+
 export const IndexPageTemplate = ({
   image,
   title,
@@ -66,42 +79,17 @@ export const IndexPageTemplate = ({
   intro,
   posts
 }) => (<>
-	<section id="hero" className="jumbotron">
-		<h1 className="title">
-			Hi, my name is <span className="text-color-primary">Matt</span>
-			<br />
-			and I like to automate <em>everything</em>
-		</h1>
-	</section>
-
-	<nav className="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
-	{/*}<a class="navbar-brand" href="#">Navbar w/ text</a>*/}
-		<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-			<span className="navbar-toggler-icon"></span>
-		</button>
-		<div className="collapse navbar-collapse" id="navbarText">
-			<ul className="navbar-nav mr-auto mt-2 mt-lg-0">
-				<li className="nav-item active">
-					<a className="nav-link" href="#home-automation">#Home Automation <span className="sr-only">(current)</span></a>
-				</li>
-				<li className="nav-item">
-					<a className="nav-link" href="#engineering">#Software Engineering</a>
-				</li>
-			</ul>
-		</div>
-	</nav>
 
 	{/*console.log('entries', Object.entries(posts))*/}
 
-	<div className="container">
-		{Object.entries(posts).map(([key, value]) => {
-			console.log('loop', key, value);
-			return <div className="row" style={{marginTop: '2rem', marginBottom: '2rem'}}>
-				<div className="col">
-					<PostCategory key={key} name={key} posts={value} />
-				</div>
-			</div>;
-		})}
+	<div className="container py-5">
+		<div className="row">
+			<div className="col">
+				<h2>Recent Posts</h2>
+			</div>
+		</div>
+
+		<PostDeck posts={posts.edges} />
 	</div>
 </>)
 
@@ -121,13 +109,9 @@ const IndexPage = ({ data }) => {
 	console.log('IndexPage', data);
 
   const { frontmatter } = data.index;
-  const recentPosts = data.recent_posts;
-  const homeAutomation = data.home_automation;
-
-  console.log('home automation', homeAutomation);
 
   return (
-    <Layout>
+    <Layout hero=<Hero />>
       <IndexPageTemplate
         image={frontmatter.image}
         title={frontmatter.title}
@@ -136,10 +120,8 @@ const IndexPage = ({ data }) => {
         mainpitch={frontmatter.mainpitch}
         description={frontmatter.description}
         intro={frontmatter.intro}
-		posts={{
-			'Recent Posts': recentPosts,
-			'Home Automation': homeAutomation
-		}}
+		posts={data.recent_posts}
+
       />
     </Layout>
   )
@@ -190,17 +172,8 @@ fragment Posts on MarkdownRemarkConnection {
       }
     }
 
-	recent_posts: allMarkdownRemark(sort: {order: DESC, fields: [frontmatter___date]}, limit: 3, filter: {fields: {type: {eq: "post"}}, frontmatter: {draft: {ne: true}}}) {
+	recent_posts: allMarkdownRemark(sort: {order: DESC, fields: [frontmatter___date]}, limit: 9, filter: {fields: {type: {eq: "post"}}, frontmatter: {draft: {ne: true}}}) {
     ...Posts
-  }
-
-	home_automation: allMarkdownRemark(
-		sort: { order: DESC, fields: [frontmatter___date] }
-		limit: 3
-		filter: { fields: { type: { eq: "post" } }, frontmatter: {tags: {in: "home automation"}} }
-	  ) {
-		...Posts
-	  }
-
+}
   }
 `

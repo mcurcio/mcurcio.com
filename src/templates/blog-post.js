@@ -5,6 +5,8 @@ import { Helmet } from 'react-helmet'
 import { graphql, Link } from 'gatsby'
 import Layout from '../components/Layout'
 import Content, { HTMLContent } from '../components/Content'
+import PreviewCompatibleImage from '../components/PreviewCompatibleImage';
+
 
 export const BlogPostTemplate = ({
   content,
@@ -13,20 +15,32 @@ export const BlogPostTemplate = ({
   tags,
   title,
   helmet,
+  featuredimage
 }) => {
   const PostContent = contentComponent || Content
 
   return (
-    <section className="section">
+    <div className="container">
       {helmet || ''}
-      <div className="container content">
-	  	<div className="columns">
-			<div className="column is-10 is-offset-1">
+      <div className="row">
+	  	<div className="column">
 			<Link href="/">Back</Link>
-			</div>
 		</div>
-        <div className="columns">
-          <div className="column is-10 is-offset-1">
+	</div>
+
+	<div className="row">
+        <div className="column">
+			<PreviewCompatibleImage
+			  imageInfo={{
+				image: featuredimage,
+				alt: `featured image thumbnail for post ${title}`,
+			  }}
+			/>
+		</div>
+	</div>
+
+	<div className="row">
+		<div className="column col-md-8 offset-md-2">
             <h1 className="title is-size-2 has-text-weight-bold is-bold-light">
               {title}
             </h1>
@@ -35,19 +49,14 @@ export const BlogPostTemplate = ({
             {tags && tags.length ? (
               <div style={{ marginTop: `4rem` }}>
                 <h4>Tags</h4>
-                <ul className="taglist">
                   {tags.map((tag) => (
-                    <li key={tag + `tag`}>
-                      <Link to={`/tags/${kebabCase(tag)}/`}>{tag}</Link>
-                    </li>
+                      <Link to={`/tags/${kebabCase(tag)}/`} className="badge badge-primary" style={{marginRight: '1rem'}}>{tag}</Link>
                   ))}
-                </ul>
               </div>
             ) : null}
           </div>
-        </div>
       </div>
-    </section>
+    </div>
   )
 }
 
@@ -79,6 +88,7 @@ const BlogPost = ({ data }) => {
         }
         tags={post.frontmatter.tags}
         title={post.frontmatter.title}
+		featuredimage={post.frontmatter.featuredimage}
       />
     </Layout>
   )
@@ -102,6 +112,13 @@ export const pageQuery = graphql`
         title
         description
         tags
+		featuredimage {
+          childImageSharp {
+            fluid(maxWidth: 1140, maxHeight: 400, quality: 100) {
+              ...GatsbyImageSharpFluid
+            }
+          }
+        }
       }
     }
   }
