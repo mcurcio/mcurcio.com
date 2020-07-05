@@ -72,7 +72,10 @@ module.exports = {
         purgeOnly: ['/all.sass'], // applies purging only on the bulma css file
       },
     }, // must be after other CSS plugins
-	//'gatsby-plugin-slug',
+	{
+      resolve: `gatsby-plugin-create-client-paths`,
+      options: { prefixes: [`/olivias-cards-for-mustard-seed/*`] },
+    },
     'gatsby-plugin-netlify', // make sure to keep it last in the array
   ],
 }
