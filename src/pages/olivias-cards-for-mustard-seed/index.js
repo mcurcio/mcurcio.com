@@ -275,7 +275,7 @@ function Page(params) {
 	return <>
 		<Helmet>
 			<title>Olivia's Cards for Mustard Seed School</title>
-			<bodyAttributes data-spy="scroll" data-target="#navbar" data-offset="0" />
+			<bodyAttributes data-spy="scroll" data-target="#navbar" data-offset="0" className="cards-for-mustard-seed" />
 {/*}
 			<script
 			  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -289,7 +289,7 @@ function Page(params) {
 
 		<div data-spy="scroll" data-target="navbar" data-offset="0">
 			<div className="container">
-				<h1 style={{marginTop: '1em', marginBottom: '1em'}}>Olivias Cards for Mustard Seed</h1>
+				<h1 style={{marginTop: '1em', marginBottom: '1em'}}>Olivia's Cards for Mustard Seed</h1>
 
 				<div className="row justify-content-center">
 					<div className="col-8">
@@ -298,7 +298,7 @@ function Page(params) {
 
 							<p className="lead" style={{fontSize: '1em'}}>For $31.50 you will receive 30 or more high quality hand-crafted cards in a beautiful storage box. Adorable AND functional AND to help children in our community? Yes please!</p>
 
-							<p><strong>$13 of each box sold will go towards meeting the needs of Mustard Seed classes.</strong></p>
+							<p>At least <strong>$13 of each box sold will go towards meeting the needs of Mustard Seed classes.</strong></p>
 
 							<p style={{display: 'none'}}>All you need to do is use the link below to select which box(es) you’d like to purchase. If you live locally, I will deliver your purchase to your door. Talk about full service! If you live further away, I can ship your cards without the decorative box.</p>
 
@@ -355,7 +355,7 @@ function Page(params) {
 						})}
 
 						<div className="form-group row" style={{marginTop: '2em'}}>
-							<label htmlFor="donation" className="col-sm-5 col-form-label offset-sm-2">Donate to Mustard School</label>
+							<label htmlFor="donation" className="col-sm-5 col-form-label offset-sm-2">Donate to Mustard Seed School</label>
 
 							<div className="col-sm-3 input-group">
 								<div className="input-group-prepend">
