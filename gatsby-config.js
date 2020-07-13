@@ -73,8 +73,11 @@ module.exports = {
       },
     }, // must be after other CSS plugins
 	{
-      resolve: `gatsby-plugin-create-client-paths`,
-      options: { prefixes: [`/olivias-cards-for-mustard-seed/*`] },
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+		  trackingId: 'UA-31568871-1',
+		  head: false,
+	  },
     },
     'gatsby-plugin-netlify', // make sure to keep it last in the array
   ],
