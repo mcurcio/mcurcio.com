@@ -3,7 +3,7 @@ import { Link } from 'gatsby'
 import github from '../img/github-icon.svg'
 import logo from '../img/logo.svg'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons'
+import { faGithub, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons'
 
 const Navbar = class extends React.Component {
   constructor(props) {
@@ -63,6 +63,11 @@ const Navbar = class extends React.Component {
 					<li className="nav-item">
 						<a class="nav-link" href="https://linkedin.com/in/curciomatt">
 							<FontAwesomeIcon icon={faLinkedin} />
+						</a>
+					</li>
+					<li className="nav-item">
+						<a class="nav-link" href="https://twitter.com/_mcurcio">
+							<FontAwesomeIcon icon={faTwitter} />
 						</a>
 					</li>
 		        </ul>

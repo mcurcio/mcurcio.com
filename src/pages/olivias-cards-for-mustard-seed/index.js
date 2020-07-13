@@ -99,7 +99,7 @@ function AddToCart() {
 	</div>;
 }
 
-function Header({params}) {
+function Header({params, boxCount}) {
 	console.log('Header params', params);
 	const BASE_PATH = params.uri;
 	console.log('BASE_PATH', BASE_PATH);
@@ -109,7 +109,7 @@ function Header({params}) {
 	];
 	HEADERS = HEADERS.concat(BOXES.map(box => ([box.title, box.key])));
 	HEADERS = HEADERS.concat([
-		['Cart', 'cart']
+		['Cart', 'cart', boxCount]
 	]);
 
 	console.log('HEADERS', HEADERS);
@@ -124,8 +124,13 @@ function Header({params}) {
 				<div className="collapse navbar-collapse" id="navbarNav">
 					<ul className="navbar-nav nav">
 						{HEADERS.map(l => {
+							let innerSpan = '';
+							if (l[2]) {
+								innerSpan = <span className="badge badge-pill">{l[2]}</span>
+							}
+
 							return <li key={l[1] || 'home'} className="nav-item">
-								<a href={`#${l[1]}`} className="nav-link">{l[0]}</a>
+								<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
 							</li>;
 						})}
 					</ul>
@@ -210,14 +215,18 @@ function Page(params) {
 		};
 
 		box.getSubtotal = function () {
-			const count = box.getCount();
+			const count = box.getCount() || 0;
 
 			return count * PRICE_PER_BOX;
 		}
 	});
 
+	function getTotalBoxCount() {
+		return BOXES.reduce((total, box) => total + box.getCount(), 0);
+	}
+
 	function setDonation(value) {
-		const REGEX = /(^\d+(\.\d{0,2})?)/;
+		const REGEX = /(^[\d,]+(\.\d{0,2})?)/;
 		const match = REGEX.exec(value);
 		console.log('setDonation', match);
 		value = match ? match[1] : '';
@@ -237,7 +246,7 @@ function Page(params) {
 			return 0;
 		}
 
-		const boxCount = BOXES.reduce((total, box) => total + box.getCount(), 0);
+		const boxCount = getTotalBoxCount();
 		console.log('getBoxCount', boxCount);
 
 		if (boxCount == 0) {
@@ -256,7 +265,7 @@ function Page(params) {
 
 		BOXES.forEach(box => subtotal += box.getSubtotal());
 
-		const [donationDollars, donationCents] = cart.donation.split('.');
+		const [donationDollars, donationCents] = cart.donation.replace(/[^\d\.]/g, '').split('.');
 		console.log('donationParts', donationDollars, donationCents);
 		if (donationDollars) {
 			subtotal += parseInt(donationDollars, 10) * 100;
@@ -285,7 +294,7 @@ function Page(params) {
 */}
 		</Helmet>
 
-		<Header params={params} className='sticky-top' />
+		<Header params={params} boxCount={getTotalBoxCount()} className='sticky-top' />
 
 		<div data-spy="scroll" data-target="navbar" data-offset="0">
 			<div className="container">
@@ -296,7 +305,7 @@ function Page(params) {
 						<blockquote className="blockquote" style={{fontSize: '1em'}}>
 							<p className="lead" style={{fontSize: '1em'}}>Do you know someone who needs a smile? Me too. With COVID cases on the rise, this seems like the perfect time to deliver a socially distant hug via a card!</p>
 
-							<p className="lead" style={{fontSize: '1em'}}>For $31.50 you will receive 30 or more high quality hand-crafted cards in a beautiful storage box. Adorable AND functional AND to help children in our community? Yes please!</p>
+							<p className="lead" style={{fontSize: '1em'}}>For ${formatPrice(PRICE_PER_BOX)} you will receive 30 or more high quality hand-crafted cards in a beautiful storage box. Adorable AND functional AND to help children in our community? Yes please!</p>
 
 							<p>At least <strong>$13 of each box sold will go towards meeting the needs of Mustard Seed classes.</strong></p>
 
@@ -333,31 +342,43 @@ function Page(params) {
 				return <BoxDetails key={box.key} count={iteration} details={box} />
 			})}
 
+<div style={{background: '#eee'}}>
 			<div className="container">
 				<div className="row">
 					<div className="col">
+						<h2 id="cart" className="text-center">Cart</h2>
 					</div>
 				</div>
 
 				<div className="row">
-					<div className="col-md-6">
-						<h3 id="cart" className="text-center">Cart</h3>
-
+					<div className="col-md-6 offset-3" style={{background: '#fff', borderRadius: '2em', padding: '3em'}}>
 						{BOXES.map((box, iteration) => {
 							return <div key={box.key} className={`form-group row`} style={{marginBottom: 0}}>
 								<div className="col-sm-2">
 									<input type="number" className="form-control" id={`box${box.key}`} value={box.getCount()} onChange={(e) => box.setCount(e.target.value)} />
 								</div>
-								<label htmlFor={`box${box.key}`} className="col-sm-6 col-form-label">{box.title}</label>
-								<div className="col-sm-3 col-form-label">${formatPrice(box.getSubtotal())}</div>
+								<label htmlFor={`box${box.key}`} className="col-sm-7 col-form-label">{box.title}</label>
+								<div className="col-sm-3 col-form-label" style={{textAlign: 'right'}}>${formatPrice(box.getSubtotal())}</div>
 
 							</div>;
 						})}
 
-						<div className="form-group row" style={{marginTop: '2em'}}>
-							<label htmlFor="donation" className="col-sm-5 col-form-label offset-sm-2">Donate to Mustard Seed School</label>
+						<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
+							<div className="col-sm-3 offset-sm-6">Shipping</div>
+							<div className="col-sm-3" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
+						</div>
+						<div className="form-group row">
+							<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4">Coupon Code</label>
 
-							<div className="col-sm-3 input-group">
+							<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
+								<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
+							</div>
+						</div>
+
+						<div className="form-group row" style={{marginTop: '2em'}}>
+							<label htmlFor="donation" className="col-md-6 col-form-label">Donate to Mustard Seed School</label>
+
+							<div className="col-sm-4 input-group">
 								<div className="input-group-prepend">
 									<span className="input-group-text">$</span>
 								</div>
@@ -365,26 +386,18 @@ function Page(params) {
 							</div>
 						</div>
 
-						<div className="form-group row">
-							<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-2">Coupon Code</label>
-
-							<div className="col-sm-4 input-group">
-								<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
-							</div>
-						</div>
-
-						<div className="row">
-							<div className="col-sm-3 offset-sm-5">Shipping</div>
-							<div className="col-sm-3">${formatPrice(getShipping())}</div>
-						</div>
-
 						<div className="row">
 							<div className="col-sm-3 offset-sm-5">Total</div>
 							<div className="col-sm-3">${formatPrice(getSubtotal())}</div>
 						</div>
 					</div>
+				</div>
+			</div>
+</div>
 
-					<div className="col">
+			<div className="container">
+				<div className="row">
+					<div className="col-md-6 offset-3">
 						<h3 id="checkout" className="text-center">Checkout</h3>
 
 						<form>
