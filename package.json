@@ -11,6 +11,7 @@
     "@stripe/react-stripe-js": "^1.1.2",
     "@stripe/stripe-js": "^1.7.0",
     "bulma": "^0.9.0",
+    "card-validator": "^7.0.1",
     "gatsby": "^2.20.35",
     "gatsby-image": "^2.3.5",
     "gatsby-plugin-create-client-paths": "^2.3.6",
@@ -40,7 +41,8 @@
     "react-credit-cards": "^0.8.3",
     "react-dom": "^16.8.4",
     "react-helmet": "^6.0.0",
-    "uuid": "^7.0.0"
+    "uuid": "^7.0.0",
+    "yup": "^0.29.1"
   },
   "keywords": [
     "gatsby"
@@ -52,10 +54,12 @@
     "start": "npm run develop",
     "build": "npm run clean && gatsby build",
     "develop": "npm run clean && gatsby develop",
+    "netlify": "netlify dev",
     "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"{gatsby-*.js,src/**/*.js}\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "netlify-cli": "^2.58.0",
     "prettier": "^2.0.5"
   }
 }

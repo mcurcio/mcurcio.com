@@ -10,35 +10,38 @@ import {
   Elements,
   useStripe,
   useElements,
+  injectStripe
 } from '@stripe/react-stripe-js';
 import Cards from 'react-credit-cards';
 import sha512 from 'js-sha512';
+import * as Yup from 'yup';
+import * as cardValidator from 'card-validator';
+//import { OLIVIAS_CARDS_STRIPE_PUBLIC } from "gatsby-env-variables"
 //window.sha512 = sha512;
 
 import './style.sass'
 
-const TEST_STRIPE_KEY = 'pk_test_51H1gNHKfzXCgcPcVsgq44OyTHMAtY2pGJ9j08uYN3Xs7K6RIZUGVNLm8coyoc3NMHzB6Cmuuby9lzNYO14AMq7sP00dMmtHiWh';
-const LIVE_STRIPE_KEY = 'pk_live_51H1gNHKfzXCgcPcVMSDt4gpCRR2Nm9my4JMzyKs5K3ZUWovlzvEQpWeRso5eCu9ABiFhZnGQ7B18Njfebi3iKMrG00AsdJIKic';
+const stripePromise = loadStripe(process.env.GATSBY_OLIVIAS_CARDS_STRIPE_PUBLIC);
 
 const PRICE_PER_BOX = 3150;
-const FREE_DELIVERY_CODE = '4a3968bef4c928978ed7581d6304fdd039f36905bccd297e33a770728e66dbdc5528d2df4a6d442a39f13e6a9cc1267ae3a0595603bde68ad6d927088847b239';
+const FREE_DELIVERY_CODE = process.env.GATSBY_OLIVIAS_CARDS_FREE_DELIVERY_HASH;
 
 const BOXES = [
 	{
 		image: '92579501_2699594073596802_1619589243418443776_o',
-		title: 'Kids Box',
+		title: 'Kids Birthday Box',
 		key: 'kids',
 		description: '30 Hand Crafted and Printed cards designed especially for kids'
 	},
 	{
 		image: '92696975_2699594150263461_3946356646103482368_o',
-		title: 'All Occassion Box #1',
+		title: 'All Occasion Box #1',
 		key: 'all1',
 		description: '11 Birthday, 1 Belated Birthday, 4 Blank, 2 New 	Baby, 1 New Home, 1 Anniversary, 1 Good Luck, 3 Congratulations, 1 Engagement, 1 Wedding, 3 Sympathy, 1 Thank you'
 	},
 	{
 		image: '92818158_2699594126930130_5674995173591875584_o',
-		title: 'All Occassion Box #2',
+		title: 'All Occasion Box #2',
 		key: 'all2',
 		description: '13 Birthday, 2 Blank, 1 New Baby, 2 New Home, 1 Anniversary, 2 Congratulations, 1	Engagement, 2 Get Well, 2 Thinking of you, 4 Thank you'
 	},
@@ -61,8 +64,6 @@ BOXES.forEach(box => {
 
 
 });
-
-const stripePromise = loadStripe(TEST_STRIPE_KEY);
 
 function getFile(name, files) {
 	//console.log('getFile', name, files);
@@ -112,17 +113,20 @@ function Header({params, boxCount}) {
 		['Cart', 'cart', boxCount]
 	]);
 
+	let SMALL_HEADERS = [
+		['Mustard Seed School', ''],
+		['Boxes', BOXES[0].key],
+		['Cart', 'cart', boxCount]
+	];
+
 	console.log('HEADERS', HEADERS);
 
-	return <div className="box-shadow sticky-top">
-		<nav className="navbar navbar-expand-lg navbar-light nav-underline border-bottom" id="navbar">
+	return <div className="box-shadow sticky-top d-none d-lg-block">
+		<nav className="navbar navbar-expand navbar-light nav-underline border-bottom" id="navbar">
 			<div className="container">
-				<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span className="navbar-toggler-icon"></span>
-				</button>
-
+				<div className="">
 				<div className="collapse navbar-collapse" id="navbarNav">
-					<ul className="navbar-nav nav">
+					<ul className="navbar-nav nav justify-content-center">
 						{HEADERS.map(l => {
 							let innerSpan = '';
 							if (l[2]) {
@@ -135,6 +139,25 @@ function Header({params, boxCount}) {
 						})}
 					</ul>
 				</div>
+				</div>
+{/*}
+				<div className="d-none">
+				<div className="collapse navbar-collapse">
+					<ul className="navbar-nav nav justify-content-center">
+					{SMALL_HEADERS.map(l => {
+						let innerSpan = '';
+						if (l[2]) {
+							innerSpan = <span className="badge badge-pill">{l[2]}</span>
+						}
+
+						return <li key={l[1] || 'home'} className="nav-item">
+							<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
+						</li>;
+					})}
+					</ul>
+				</div>
+				</div>
+*/}
 			</div>
 		</nav>
 	</div>;
@@ -145,7 +168,7 @@ function BoxDetails({count, details}) {
 		<div className="container">
 			<div className="row text-center" style={{marginBottom: 0}}>
 				<div className="col">
-					<h2 id={details.key} className="box-title text-center">{details.title}</h2>
+					<h3 id={details.key} className="box-title text-center">{details.title}</h3>
 				</div>
 			</div>
 {/*}
@@ -175,6 +198,23 @@ function formatPrice(cents) {
 	return `${str.slice(0, -2)}.${str.slice(-2)}`
 }
 
+const NAME_VALIDATION = Yup.string().required();
+const EMAIL_VALIDATION = Yup.string().email().required();
+const ADDRESS_VALIDATION = Yup.string().required();
+const CITY_VALIDATION = Yup.string().required();
+const STATE_VALIDATION = Yup.string().required();
+const ZIP_VALIDATION = Yup.string().required().min(5).max(10);
+
+const CHECKOUT_VALIDATION = Yup.object({
+	name: NAME_VALIDATION,
+	email: EMAIL_VALIDATION,
+	address: ADDRESS_VALIDATION,
+	city: CITY_VALIDATION,
+	state: STATE_VALIDATION,
+	zip: ZIP_VALIDATION,
+	cc: Yup.boolean().oneOf([true])
+});
+
 function Page(params) {
 	//console.log('Page', params);
 
@@ -192,6 +232,23 @@ function Page(params) {
 	BOXES.forEach(box => initialState[box.key] = 0);
 
 	const [cart, setCart] = useState(initialState);
+	const [step, setStepData] = useState(false);	// false is cart, true is checkout
+	const [info, setInfo] = useState({
+		name: '',
+		email: '',
+		address: '',
+		city: '',
+		state: '',
+		zip: '',
+		cc: false
+	});
+	const [isCheckoutValid, setCheckoutValid] = useState(false);
+	const [isProcessing, setProcessing] = useState(false);
+	const [doneState, setDoneState] = useState([false, 0]);
+	const [isError, setError] = useState(false);
+
+	const stripe = useStripe();
+	const elements = useElements();
 
 	console.log('cart', cart);
 
@@ -251,11 +308,11 @@ function Page(params) {
 
 		if (boxCount == 0) {
 			return 0;
-		} else if (boxCount < 3) {
+		} else if (boxCount === 1) {
 			return 1000;
 		}
 
-		return 1000 + (boxCount-2)*400;
+		return 1000 + (boxCount-1)*500;
 	}
 
 	function getSubtotal() {
@@ -281,16 +338,295 @@ function Page(params) {
 		return subtotal;
 	}
 
+	function setInfoValue(key, value) {
+		const update = {
+			...info,
+			[key]: value
+		};
+
+		console.log('info', update);
+		setInfo(update);
+
+		const isValid = CHECKOUT_VALIDATION.isValidSync(update);
+		console.log('isValid', isValid);
+		setCheckoutValid(isValid);
+	}
+
+	function setStep(value) {
+		setInfoValue('cc', false);
+		setStepData(value);
+	}
+
+	function doCheckout(e) {
+		console.log('checkout', e);
+
+		setProcessing(true);
+		setError(false);
+
+		try {
+			const element = elements.getElement(CardElement);
+			console.log('card', element);
+
+			stripe.createToken(element)
+			.then(({token}) => {
+				console.log('token', token);
+
+				const payload = {
+					token: token.id,
+					boxes: {},
+					donation: formatPrice(cart.donation),
+					coupon: cart.coupon,
+					name: info['name'],
+					email: info['email'],
+					address: info['address'],
+					city: info['city'],
+					state: info['state'],
+					zip: info['zip'],
+				};
+
+				BOXES.forEach(box => {
+					payload.boxes[box.key] = box.getCount();
+				});
+
+				console.log('posting payload', payload);
+
+				return fetch('/.netlify/functions/olivias-cards', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(payload)
+				});
+			})
+			.then(res => {
+				console.log('response', res);
+				return res.json();
+			})
+			.then(data => {
+				console.log('response data', data);
+				setDoneState([true, data.amount]);
+				setCart(BOXES.map(() => 0));
+			})
+			.catch(err => {
+				setError(true);
+				console.error('promise error', err);
+			})
+			.then(() => {
+				setProcessing(false);
+			});
+		} catch (err) {
+			console.error('doCheckout error', err);
+
+			setProcessing(false);
+			setError(true);
+		}
+	}
+
+	let footer = '';
+	if (doneState[0]) {
+		footer = <div style={{background: '#eee'}}>
+			<div className="container">
+				<div className="row" style={{paddingTop: '2em'}}>
+					<div className="col-8 offset-2">
+						<div className="alert alert-success" role="alert">
+							<h4 class="alert-heading">Order complete!</h4>
+
+							<p>Your card was charged <strong>${formatPrice(doneState[1])}</strong>. If you have any questions, please send an email to mustardseed@mcurcio.com</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>;
+	} else {
+		if (step === false) {
+			footer = <div style={{background: '#eee'}}>
+						<div className="container">
+							<div className="row">
+								<div className="col">
+									<h2 id="cart" className="text-center">Cart</h2>
+								</div>
+							</div>
+
+							<div className="row">
+								<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
+
+
+
+
+									{BOXES.map((box, iteration) => {
+										return <div key={box.key} className={`form-group row`} style={{marginBottom: 0}}>
+											<label htmlFor={`box${box.key}`} className="col-6 col-form-label">{box.title}</label>
+											<div className="col-3">
+												<input type="number" className="form-control" id={`box${box.key}`} value={box.getCount()} onChange={(e) => box.setCount(e.target.value)} />
+											</div>
+											<div className="col-form-label col-3" style={{textAlign: 'right'}}>${formatPrice(box.getSubtotal())}</div>
+
+										</div>;
+									})}
+
+									<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
+										<div className="col-sm-3 offset-sm-5 text-right">Shipping</div>
+										<div className="col-sm-4" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
+									</div>
+									<div className="form-group row">
+										<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4 text-right">Shipping Code</label>
+
+										<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
+											<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
+										</div>
+									</div>
+
+									<div className="form-group row" style={{marginTop: '2em'}}>
+										<label htmlFor="donation" className="col-md-8 col-form-label text-right">Donate to Mustard Seed School</label>
+
+										<div className="col-md-4 input-group">
+											<div className="input-group-prepend">
+												<span className="input-group-text">$</span>
+											</div>
+											<input id="donation" type="text" className="form-control" style={{textAlign: 'right'}} value={cart.donation} onChange={e => setDonation(e.target.value)} />
+										</div>
+									</div>
+
+									<div className="row">
+										<div className="col-sm-3 offset-sm-5 text-right">Total</div>
+										<div className="col-sm-4 text-right">${formatPrice(getSubtotal())}</div>
+									</div>
+
+									<div className="row">
+										<div className="col">
+											<button type="button" className="btn btn-primary btn-block" onClick={() => setStep(true)} disabled={getSubtotal()===0}>Proceed to Checkout</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+			</div>;
+		} else {
+			const validateClassName = (VALIDATION, key) => {
+				const value = info[key];
+				if (value.trim().length !== 0) {
+					return VALIDATION.isValidSync(value) ? 'is-valid' : 'is-invalid';
+				}
+			}
+
+			footer = <div style={{background: '#eee'}}>
+				<div className="container">
+					<div className="row">
+						<div className="col">
+							<h2 id="cart" className="text-center">Checkout</h2>
+						</div>
+					</div>
+
+					<div className="row">
+						<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
+
+
+
+						<div className="form-row">
+							<h3 style={{paddingTop: 0}}>Contact Info</h3>
+						</div>
+
+
+
+						<div className="form-row" style={{marginBottom: '0.5em'}}>
+							<div className="col-12">
+								<input type="text" className={`form-control ${validateClassName(NAME_VALIDATION, 'name')}`} placeholder="Name *" value={info['name']} onChange={(e) => setInfoValue('name', e.target.value)} onFocus={e => setInfoValue('focus', 'name')}  />
+							</div>
+						</div>
+
+						<div className="form-row">
+							<div className="col-12">
+								<input type="email" className={`form-control ${validateClassName(EMAIL_VALIDATION, 'email')}`} placeholder="Email *" value={info['email']} onChange={(e) => setInfoValue('email', e.target.value)} />
+							</div>
+						</div>
+
+	<div className="form-row" style={{marginTop: '0em'}}>
+		<h3>Shipping Info</h3>
+	</div>
+
+
+
+		<div className="form-row" style={{marginBottom: '0.5em'}}>
+			<div className="col-12">
+				<input type="text" className={`form-control ${validateClassName(ADDRESS_VALIDATION, 'address')}`} placeholder="Address *" value={info['address']} onChange={(e) => setInfoValue('address', e.target.value)} />
+			</div>
+		</div>
+
+	  <div className="form-row">
+		<div className="col-7">
+		  <input type="text" className={`form-control ${validateClassName(CITY_VALIDATION, 'city')}`} placeholder="City *" value={info['city']} onChange={(e) => setInfoValue('city', e.target.value)} />
+		</div>
+		<div className="col">
+		  <input type="text" className={`form-control ${validateClassName(STATE_VALIDATION, 'state')}`} placeholder="State *" value={info['state']} onChange={(e) => setInfoValue('state', e.target.value)} />
+		</div>
+		<div className="col">
+		  <input type="text" className={`form-control ${validateClassName(ZIP_VALIDATION, 'zip')}`} placeholder="Zip *" value={info['zip']} onChange={(e) => setInfoValue('zip', e.target.value)} />
+		</div>
+	  </div>
+
+		<div className="form-row" style={{marginTop: '0em'}}>
+			<h3>Payment</h3>
+		</div>
+
+	  <div className="form-row">
+	  	<div className="col">
+				<CardElement className="form-control" onChange={e => setInfoValue('cc', e.complete)} options={{
+					hidePostalCode: true,
+					classes: {
+						base: 'form-control',
+						complete: 'is-valid',
+						invalid: 'is-invalid',
+					},
+					style: {
+						base: {
+							display: 'block',
+							width: '100%',
+							height: '38px',
+							padding: '6px 12px',
+							fontSize: '16px',
+							fontWeight: 400,
+							lineHeight: '24px',
+							color: '#495057',
+							backgroundColor: '#fff',
+							backgroundClip: 'padding-box',
+							border: '1px solid #ced4da',
+							borderRadius: '4px',
+							transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
+						},
+
+					}
+				}} />
+		</div>
+	  </div>
+
+	<button type="button" className="btn btn-primary btn-block" disabled={!isCheckoutValid || isProcessing} onClick={doCheckout} style={{marginTop: '2em'}}>Checkout</button>
+	<button type="button" className="btn btn-link" onClick={() => setStep(false)}>Review Cart</button>
+
+		{isProcessing ?	<div className="alert alert-primary" role="alert">
+			Please wait, your order is being processed <div class="spinner-border" role="status" style={{width: '1em', height: '1em'}}>
+  <span className="sr-only">Loading...</span>
+</div>
+		</div> : ''}
+
+		{isError ?	<div className="alert alert-danger" role="alert">
+			Something went wrong
+		</div> : ''}
+
+						</div>
+					</div>
+				</div>
+			</div>;
+		}
+	}
+
 	return <>
 		<Helmet>
 			<title>Olivia's Cards for Mustard Seed School</title>
 			<bodyAttributes data-spy="scroll" data-target="#navbar" data-offset="0" className="cards-for-mustard-seed" />
-{/*}
-			<script
-			  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-			  integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
-			  crossorigin="anonymous"></script>
-			<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" />
+{/*
+			<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 */}
 		</Helmet>
 
@@ -342,130 +678,15 @@ function Page(params) {
 				return <BoxDetails key={box.key} count={iteration} details={box} />
 			})}
 
-<div style={{background: '#eee'}}>
-			<div className="container">
-				<div className="row">
-					<div className="col">
-						<h2 id="cart" className="text-center">Cart</h2>
-					</div>
-				</div>
-
-				<div className="row">
-					<div className="col-md-6 offset-3" style={{background: '#fff', borderRadius: '2em', padding: '3em'}}>
-						{BOXES.map((box, iteration) => {
-							return <div key={box.key} className={`form-group row`} style={{marginBottom: 0}}>
-								<div className="col-sm-2">
-									<input type="number" className="form-control" id={`box${box.key}`} value={box.getCount()} onChange={(e) => box.setCount(e.target.value)} />
-								</div>
-								<label htmlFor={`box${box.key}`} className="col-sm-7 col-form-label">{box.title}</label>
-								<div className="col-sm-3 col-form-label" style={{textAlign: 'right'}}>${formatPrice(box.getSubtotal())}</div>
-
-							</div>;
-						})}
-
-						<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
-							<div className="col-sm-3 offset-sm-6">Shipping</div>
-							<div className="col-sm-3" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
-						</div>
-						<div className="form-group row">
-							<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4">Coupon Code</label>
-
-							<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
-								<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
-							</div>
-						</div>
-
-						<div className="form-group row" style={{marginTop: '2em'}}>
-							<label htmlFor="donation" className="col-md-6 col-form-label">Donate to Mustard Seed School</label>
-
-							<div className="col-sm-4 input-group">
-								<div className="input-group-prepend">
-									<span className="input-group-text">$</span>
-								</div>
-								<input id="donation" type="text" className="form-control" style={{textAlign: 'right'}} value={cart.donation} onChange={e => setDonation(e.target.value)} />
-							</div>
-						</div>
-
-						<div className="row">
-							<div className="col-sm-3 offset-sm-5">Total</div>
-							<div className="col-sm-3">${formatPrice(getSubtotal())}</div>
-						</div>
-					</div>
-				</div>
-			</div>
-</div>
-
-			<div className="container">
-				<div className="row">
-					<div className="col-md-6 offset-3">
-						<h3 id="checkout" className="text-center">Checkout</h3>
-
-						<form>
-						<div className="form-row">
-							<div className="col-12">
-								<input type="text" className="form-control" placeholder="Name" />
-							</div>
-						</div>
-
-						<div className="form-row">
-							<div className="col-12">
-								<input type="email" className="form-control" placeholder="Email" />
-							</div>
-						</div>
-
-							<div className="form-row">
-								<div className="col-12">
-									<input type="text" className="form-control" placeholder="Address" />
-								</div>
-							</div>
-
-						  <div className="form-row">
-						    <div className="col-7">
-						      <input type="text" className="form-control" placeholder="City" />
-						    </div>
-						    <div className="col">
-						      <input type="text" className="form-control" placeholder="State" />
-						    </div>
-						    <div className="col">
-						      <input type="text" className="form-control" placeholder="Zip" />
-						    </div>
-						  </div>
-
-						  <div className="form-row" style={{marginTop: '2em'}}>
-						  	<div className="col-8">
-								<input type="text" className="form-control" placeholder="Credit Card Number" />
-							</div>
-
-							<div className="col">
-								<input type="text" className="form-control" placeholder="Expiration" />
-							</div>
-
-							<div className="col">
-								<input type="text" className="form-control" placeholder="CVV" />
-							</div>
-						  </div>
-
-						  <div className="row">
-						  	<div className="col">
-							<Cards
-	  cvc={''}
-	  expiry={''}
-	  focused={false}
-	  name={''}
-	  number={'4242424242424242'}
-	/>
-							</div>
-						  </div>
-						</form>
-					</div>
-				</div>
-			</div>
+			{footer}
 		</div>
 	</>;
 }
 
 function DefaultOutput(props) {
-	return Page(props);
+	return <Elements stripe={stripePromise}>
+		<Page {...props} />
+	</Elements>
 }
 
 export default DefaultOutput;
