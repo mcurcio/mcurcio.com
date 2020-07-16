@@ -52,7 +52,7 @@
   "scripts": {
     "clean": "gatsby clean",
     "start": "npm run develop",
-    "build": "npm run clean && gatsby build",
+    "build": "npm run clean && gatsby build && npm --prefix lambda/olivias-cards install",
     "develop": "npm run clean && gatsby develop",
     "netlify": "netlify dev",
     "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"{gatsby-*.js,src/**/*.js}\"",
