@@ -34,6 +34,9 @@ module.exports.handler = async function(event, context) {
 	try {
 		const payload = JSON.parse(event.body);
 
+		console.log('payload', payload);
+		console.log('products', PRODUCTS);
+
 		const address = {
 			country: 'US',
 			line1: payload.address,
@@ -51,6 +54,8 @@ module.exports.handler = async function(event, context) {
 				address
 			},
 		});
+
+		console.log('customer', customer);
 
 		let boxCount = 0;
 		await Promise.all(PRODUCTS.boxes.map(async box => {
@@ -117,13 +122,19 @@ module.exports.handler = async function(event, context) {
 			auto_advance: false
 		});
 
+		console.log('invoice', invoice);
+
 		const card = await stripe.customers.createSource(customer.id, {
 			source: payload.token
 		});
 
+		console.log('card', card);
+
 		await stripe.invoices.pay(invoice.id);
 
 		const finalInvoice = await stripe.invoices.retrieve(invoice.id);
+
+		console.log('finalInvoice', finalInvoice);
 
 		return {
 			statusCode: 200,

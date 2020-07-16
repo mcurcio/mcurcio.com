@@ -81,7 +81,6 @@ module.exports = {
 		  head: false,
 	  },
     },
-//	'gatsby-env-variables',
     'gatsby-plugin-netlify', // make sure to keep it last in the array
   ],
 }
