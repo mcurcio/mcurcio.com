@@ -106,7 +106,7 @@ function Header({params, boxCount}) {
 	console.log('BASE_PATH', BASE_PATH);
 
 	let HEADERS = [
-		['Mustard Seed School', '']
+		['Mustard Seed School', 'school']
 	];
 	HEADERS = HEADERS.concat(BOXES.map(box => ([box.title, box.key])));
 	HEADERS = HEADERS.concat([
@@ -114,7 +114,7 @@ function Header({params, boxCount}) {
 	]);
 
 	let SMALL_HEADERS = [
-		['Mustard Seed School', ''],
+		['Mustard Seed School', 'school'],
 		['Boxes', BOXES[0].key],
 		['Cart', 'cart', boxCount]
 	];
@@ -599,7 +599,7 @@ function Page(params) {
 		</div>
 	  </div>
 
-	<button type="button" className="btn btn-primary btn-block" disabled={!isCheckoutValid || isProcessing} onClick={doCheckout} style={{marginTop: '2em'}}>Checkout</button>
+	<button type="button" className="btn btn-primary btn-block" disabled={!isCheckoutValid || isProcessing} onClick={doCheckout} style={{marginTop: '2em'}}>Checkout &mdash; ${formatPrice(getSubtotal())}</button>
 	<button type="button" className="btn btn-link" onClick={() => setStep(false)}>Review Cart</button>
 
 		{isProcessing ?	<div className="alert alert-primary" role="alert">
@@ -634,6 +634,17 @@ function Page(params) {
 
 		<div data-spy="scroll" data-target="navbar" data-offset="0">
 			<div className="container">
+				<div className="row">
+				<div className="col col-8 offset-2">
+				<blockquote className="blockquote" style={{marginTop: '3em'}}>
+					<p className="mb-0" style={{marginTop: '1em'}}>Thank you for being a part of creating a legacy for our Olivia. As her parents, it is our desire to transform pain and loss into a legacy of love &mdash; love that hopes, love that perseveres.</p>
+
+					<p className="mb-0" style={{marginTop: '1em'}}>If you are not able to purchase a card box at this time, please <a href="https://sacloaves.org/donate.php">consider a donation</a>. Every dollar will contribute to bringing hope and resources for homeless children and their families to persevere.</p>
+					<footer className="blockquote-footer" style={{marginTop: '1em'}}>With deepest gratitude, <cite title="Celeste & Matt Curcio">Celeste &amp; Matt Curcio</cite></footer>
+				</blockquote>
+				</div>
+				</div>
+
 				<h1 style={{marginTop: '1em', marginBottom: '1em'}}>Olivia's Cards for Mustard Seed</h1>
 
 				<div className="row justify-content-center">
@@ -653,7 +664,7 @@ function Page(params) {
 
 				<div className="row">
 					<div className="col-md-6">
-						<h2>Mustard Seed School</h2>
+						<h2 id="school">Mustard Seed School</h2>
 
 						<p><a href='http://www.sacloaves.org/programs/mustardseedschool'>Mustard Seed</a> is a free, private school for children 3-15 years old which provides a safe, nurturing and structured environment, a positive learning experience, happy memories, survival resources of food, clothing and shelter referrals, medical and dental screenings, immunization updates, counseling for children and their parents, and assistance entering or reentering public schools.</p>
 
