@@ -1,45 +1,32 @@
 ---
-title: 'Monoprice 31028 RS232'
+title: 'Netlify checkout with Stripe'
 date: 2020-07-16T12:13:10.000Z
-draft: true
 featuredpost: false
-featuredimage: /img/310281.jpg
-description: >-
-  Why does the RS232 connection of the Monoprice 31028 not work?
+featuredimage: header.jpg
+description: Thanks to Netlify and Stripe, it has never been easier to throw together a payment page that scales.
 tags:
-  - home automation
-  - debugging
+  - olivias cards
+  - mustard seed school
+  - stripe
+  - netlify
+  - serverless
 ---
-## Installation Amplifier
+But I had a few challenges along the way, so I am documenting my notes here in case I need to do this again in the future.
 
-The [Monoprice 31028](https://www.monoprice.com/product?p_id=31028) is a 6 zone, 12 channel installation amplifier that is very powerful and versatile. Unlike its big brother the [Monoprice 10761](https://www.monoprice.com/product?p_id=10761), there are no wall controllers to configure the state of the channels. So in order to set the volume, balance, or EQ of a channel, RS232 is a requirement*.
+In the process of building my [Olivias Cards for Mustard Seed School](/olivias-cards-for-mustard-seed) fundraiser page, I needed a checkout solution. I have experience with [Stripe](https://stripe.com), so that was the obvious choice.
 
-_*The 31028 also supports IR control, but the controller must be physically rewired per zone and provides no feedback. So you could, in theory, change the volume settings, but would have no feedback as to what the current volume is..._
+The final code is in this repository, the [frontend code is here](https://github.com/mcurcio/mcurcio.com/blob/master/src/pages/olivias-cards-for-mustard-seed/index.js) (caution: the frontend code is a MESS), and the [backend code is here](https://github.com/mcurcio/mcurcio.com/blob/master/lambda/olivias-cards/olivias-cards.js).
 
-## Monoprice 31028 pinout
+The requirements were:
+1. No PCI requirements - Stripe needed to handle all of the processing and security
+2. Custom shipping costs logic, including free shipping code
+3. Generated invoices and emails
+4. Integrated on the page (no external checkout form)
 
-So RS232 control is a MUST, but how is it configured? Thankfully, both amplifiers at the very least have the same pinout, with this image taken straight from the [Monoprice 31028 user guide](https://downloads.monoprice.com/files/manuals/31028_Manual_180731.pdf):
+Thanks to [Stripe Elements](https://stripe.com/payments/elements) requirement #1 was achievable with essentially copy/pasting code from the React plugin docs. The other requirements were a bit more challenging.
 
-![Monoprice 31028 pinout](./31028_rs232_pinout.png)
+I tried two different methods for generating the backend code. At first, I tried using the [Stripe Orders API](https://stripe.com/docs/api/orders/object) because a quick glance through the docs showed that I could pass individual line items to the checkout process, which I *assumed* would get translated to a final receipt. Spoiler: all of the line items are coalesced into a single charge.
 
-## RS232 protocol
+The second solution that I tried was successful -- using the [Stripe Invoices API](https://stripe.com/docs/api/invoices) I was able to add the individual line items and then apply them to a single invoice which could be charged. All of the relevant code is in [the serverless Lambda code](https://github.com/mcurcio/mcurcio.com/blob/master/lambda/olivias-cards/olivias-cards.js).
 
-While both amplifiers have the same pinout, it turns out that their protocols are incompatible. Full details of the 10761 protocol can be found in the [Monoprice 10761 user guide](https://downloads.monoprice.com/files/manuals/10761_Manual_131209.pdf).
-
-For example, to query the volume of zone 1 on the 10761, this command is sent:
-
-```?11VO<CR>``` (hex `3f 31 31 56 4f 0d`)
-
-While on the 31028, the same command looks like this:
-
-```?1VO+``` (hex `3f 31 56 4f 2b`)
-
-Note that the 10761 commands are terminated by a carriage return, while the 31028 commands are not.
-
-More importantly, and this stumped for a while: the 10761 will echo back command characters whereas the 31028 *does not echo back command characters*. This caused me to question whether I had wired my serial cables correctly for quite some time as I can open a telnet session to the 10761 (through my digi terminal server) and type in commands, hit enter, and get responses back. For the 31028, typing in commands results in no visible feedback, and as the carriage return is not part of protocol there is not even an "unknown command" type error reported.
-
-## Key Points
-
-1. The Monoprice 10761 and 31028 use the same serial pinout
-1. The devices use completely different protocols
-1. The Monoprice 31028 does not echo back characters, and is otherwise silent unless it receives a complete and valid command
+*Header image via https://mitchgavan.com/react-serverless-shop/*
