@@ -7,14 +7,16 @@ import Features from '../components/Features'
 import BlogRoll from '../components/BlogRoll'
 import PreviewCompatibleImage from '../components/PreviewCompatibleImage';
 
+import _ from 'lodash';
+
 //import '../../styles/style.scss'
 
 function PostDeckCard({post}) {
 	console.log('PostDeckCard', post);
 
-	return <div>
+	return <div className={`card ${post.frontmatter.featuredpost?'featuredpost':''}`}>
     {/*}<img className="card-img-top" src="..." alt="Card image cap" />*/}
-	<Link href={post.fields.slug}>
+	<Link to={post.fields.slug}>
 		<PreviewCompatibleImage
 		  imageInfo={{
 			image: post.frontmatter.featuredimage,
@@ -29,7 +31,7 @@ function PostDeckCard({post}) {
       <h5 className="card-title"><Link href={post.fields.slug} style={{color:'inherit'}}>{post.frontmatter.title}</Link></h5>
 
       <p className="card-text">{post.frontmatter.description}</p>
-	  <Link href={post.fields.slug}>Continue reading</Link>
+	  <Link to={post.fields.slug}>Continue reading</Link>
     </div>
 
   </div>
@@ -38,25 +40,11 @@ function PostDeckCard({post}) {
 function PostDeck({posts}) {
 	console.log('PostDeck', posts);
 
-	return <div className="row">
+	return <div className="row postdeck">
 		{posts.map(post => <div className="col-4 align-items-stretch">
 			<PostDeckCard post={post.node} />
 		</div>)}
 	</div>;
-}
-
-function PostCategory({name, posts}) {
-	console.log('PostCategory', name, posts);
-
-	return <>
-		<div className="row">
-			<div className="col">
-				<h2>#{name}</h2>
-			</div>
-		</div>
-
-		<PostDeck posts={posts.edges} />
-	</>;
 }
 
 function Hero() {
@@ -89,7 +77,10 @@ export const IndexPageTemplate = ({
 			</div>
 		</div>
 
-		<PostDeck posts={posts.edges} />
+		{_.chunk(posts.edges, 3).map((chunk, index) => {
+			console.log('chunk', chunk, index);
+			return <PostDeck key={index} posts={chunk} />;
+		})}
 	</div>
 </>)
 

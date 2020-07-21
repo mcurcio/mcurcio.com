@@ -650,7 +650,9 @@ function Page(params) {
 
 					<p className="mb-0" style={{marginTop: '1em'}}>If you are not able to purchase a card box at this time, please <a href="#cart">consider a donation</a>. Every dollar will contribute to bringing hope and resources for homeless children and their families to persevere.</p>
 
-					<p style={{marginTop: '1em'}}>If you have any questions, please send an email to oliviascards@mcurcio.com</p>
+					<p style={{marginTop: '1em', fontSize: '1em'}}>If you have any questions, please send an email to oliviascards@mcurcio.com</p>
+
+					<p style={{marginTop: '1em', fontSize: '1em'}}>Ordering will close on August 2, and boxes will ship mid-August.</p>
 
 					<footer className="blockquote-footer" style={{marginTop: '1em'}}>With deepest gratitude, <cite title="Celeste & Matt Curcio">Celeste &amp; Matt Curcio</cite></footer>
 				</blockquote>
