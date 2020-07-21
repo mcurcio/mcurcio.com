@@ -1,6 +1,9 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.OLIVIAS_CARDS_STRIPE_PRIVATE);
 const crypto = require('crypto');
+const Sentry = require('@sentry/node');
+
+Sentry.init({ dsn: 'https://56c57ce9b15f4db6b408a0bfa96b27e1@o423520.ingest.sentry.io/5353905' });
 
 const PRICE_PER_BOX = 3150;
 
@@ -143,6 +146,8 @@ module.exports.handler = async function(event, context) {
 			})
 		};
 	} catch (err) {
+		Sentry.captureException(err);
+
 		console.error('error', err);
 		return {
 			statusCode: 500,

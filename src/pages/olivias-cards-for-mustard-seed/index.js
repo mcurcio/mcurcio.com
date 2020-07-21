@@ -16,10 +16,13 @@ import Cards from 'react-credit-cards';
 import sha512 from 'js-sha512';
 import * as Yup from 'yup';
 import * as cardValidator from 'card-validator';
+import * as Sentry from '@sentry/browser';
 //import { OLIVIAS_CARDS_STRIPE_PUBLIC } from "gatsby-env-variables"
 //window.sha512 = sha512;
 
 import './style.sass'
+
+Sentry.init({ dsn: 'https://56c57ce9b15f4db6b408a0bfa96b27e1@o423520.ingest.sentry.io/5353905' });
 
 const stripePromise = loadStripe(process.env.GATSBY_OLIVIAS_CARDS_STRIPE_PUBLIC);
 
@@ -430,6 +433,12 @@ function Page(params) {
 				setCart(BOXES.map(() => 0));
 			})
 			.catch(err => {
+				if (typeof(err) === 'string') {
+					Sentry.captureMessage(err);
+				} else {
+					Sentry.captureException(err);
+				}
+
 				setError(true);
 				console.error('promise error', err);
 				recordEvent('checkout', 'error');
@@ -441,6 +450,12 @@ function Page(params) {
 				//ga('send', 'event', 'checkout', 'complete', 'Olivias Cards');
 			});
 		} catch (err) {
+			if (typeof(err) === 'string') {
+				Sentry.captureMessage(err);
+			} else {
+				Sentry.captureException(err);
+			}
+
 			console.error('doCheckout error', err);
 
 			setProcessing(false);
