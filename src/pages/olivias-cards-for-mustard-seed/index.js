@@ -658,7 +658,8 @@ function Page(params) {
 			<meta property="og:type" content="website" />
 			<meta property="og:title" content="Olivias Cards for Mustard Seed School" />
 			<meta property="og:url" content="https://mcurcio.com/olivias-cards-for-mustard-seed/" />
-			<meta property="og:image" content={buildings.fluid.src} />
+			<meta property="og:description" content="Fundraiser supporting Mustard Seed School for homeless children" />
+			<meta property="og:image" content={`https://mcurcio.com${buildings.fluid.src}`} />
 
 
 
