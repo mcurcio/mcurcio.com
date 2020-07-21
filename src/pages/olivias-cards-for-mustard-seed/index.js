@@ -65,6 +65,12 @@ BOXES.forEach(box => {
 
 });
 
+function recordEvent(category, action) {
+	if (window.ga) {
+		window.ga('send', 'event', category, action, 'Olivias Cards');
+	}
+}
+
 function getFile(name, files) {
 	//console.log('getFile', name, files);
 	const node = files.edges.find(f => {
@@ -358,11 +364,12 @@ function Page(params) {
 		if (value) {
 			// "Proceed to checkout"
 
-			ga('send', 'event', 'cart', 'finalize', 'Olivias Cards');
+			recordEvent('cart', 'finalize');
+			//ga('send', 'event', 'cart', 'finalize', 'Olivias Cards');
 		} else {
 			// "Back to cart"
-
-			ga('send', 'event', 'cart', 'edit', 'Olivias Cards');
+			recordEvent('cart', 'return');
+			//ga('send', 'event', 'cart', 'edit', 'Olivias Cards');
 		}
 
 		setInfoValue('cc', false);
@@ -372,7 +379,8 @@ function Page(params) {
 	function doCheckout(e) {
 		console.log('checkout', e);
 
-		ga('send', 'event', 'cart', 'checkout', 'Olivias Cards');
+		recordEvent('cart', 'checkout');
+		//ga('send', 'event', 'cart', 'checkout', 'Olivias Cards');
 
 		setProcessing(true);
 		setError(false);
@@ -424,18 +432,21 @@ function Page(params) {
 			.catch(err => {
 				setError(true);
 				console.error('promise error', err);
-				ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
+				recordEvent('checkout', 'error');
+				//ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
 			})
 			.then(() => {
 				setProcessing(false);
-				ga('send', 'event', 'checkout', 'complete', 'Olivias Cards');
+				recordEvent('checkout', 'complete');
+				//ga('send', 'event', 'checkout', 'complete', 'Olivias Cards');
 			});
 		} catch (err) {
 			console.error('doCheckout error', err);
 
 			setProcessing(false);
 			setError(true);
-			ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
+			recordEvent('checkout', 'error');
+			//ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
 		}
 	}
 
@@ -632,7 +643,7 @@ function Page(params) {
 		</div> : ''}
 
 		{isError ?	<div className="alert alert-danger" role="alert">
-			Something went wrong
+			Something went wrong. If you are unable to complete checkout, please contact us at oliviascards@mcurcio.com
 		</div> : ''}
 
 						</div>
