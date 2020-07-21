@@ -121,45 +121,48 @@ function Header({params, boxCount}) {
 
 	console.log('HEADERS', HEADERS);
 
-	return <div className="box-shadow sticky-top d-none d-lg-block">
-		<nav className="navbar navbar-expand navbar-light nav-underline border-bottom" id="navbar">
-			<div className="container">
-				<div className="">
-				<div className="collapse navbar-collapse" id="navbarNav">
-					<ul className="navbar-nav nav justify-content-center">
-						{HEADERS.map(l => {
-							let innerSpan = '';
-							if (l[2]) {
-								innerSpan = <span className="badge badge-pill">{l[2]}</span>
-							}
+	return <div className="box-shadow sticky-top">
+		<div className="d-none d-lg-block">
+			<nav className="navbar navbar-expand navbar-light nav-underline border-bottom">
+				<div className="container">
+					<div className="collapse navbar-collapse">
+						<ul className="navbar-nav nav justify-content-center">
+							{HEADERS.map(l => {
+								let innerSpan = '';
+								if (l[2]) {
+									innerSpan = <span className="badge badge-pill">{l[2]}</span>
+								}
 
-							return <li key={l[1] || 'home'} className="nav-item">
-								<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
-							</li>;
-						})}
-					</ul>
+								return <li key={l[1] || 'home'} className="nav-item">
+									<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
+								</li>;
+							})}
+						</ul>
+					</div>
 				</div>
-				</div>
-{/*}
-				<div className="d-none">
-				<div className="collapse navbar-collapse">
-					<ul className="navbar-nav nav justify-content-center">
-					{SMALL_HEADERS.map(l => {
-						let innerSpan = '';
-						if (l[2]) {
-							innerSpan = <span className="badge badge-pill">{l[2]}</span>
-						}
+			</nav>
+		</div>
 
-						return <li key={l[1] || 'home'} className="nav-item">
-							<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
-						</li>;
-					})}
-					</ul>
+		<div className="d-block d-lg-none">
+			<nav className="navbar navbar-expand navbar-light nav-underline border-bottom">
+				<div className="container">
+					<div className="collapse navbar-collapse">
+						<ul className="navbar-nav nav justify-content-center">
+							{SMALL_HEADERS.map(l => {
+								let innerSpan = '';
+								if (l[2]) {
+									innerSpan = <span className="badge badge-pill">{l[2]}</span>
+								}
+
+								return <li key={l[1] || 'home'} className="nav-item">
+									<a href={`#${l[1]}`} className="nav-link">{l[0]}{innerSpan}</a>
+								</li>;
+							})}
+						</ul>
+					</div>
 				</div>
-				</div>
-*/}
-			</div>
-		</nav>
+			</nav>
+		</div>
 	</div>;
 }
 
@@ -308,11 +311,9 @@ function Page(params) {
 
 		if (boxCount == 0) {
 			return 0;
-		} else if (boxCount === 1) {
-			return 1000;
 		}
 
-		return 1000 + (boxCount-1)*500;
+		return boxCount*500;
 	}
 
 	function getSubtotal() {
@@ -431,7 +432,7 @@ function Page(params) {
 						<div className="alert alert-success" role="alert">
 							<h4 class="alert-heading">Order complete!</h4>
 
-							<p>Your card was charged <strong>${formatPrice(doneState[1])}</strong>. If you have any questions, please send an email to mustardseed@mcurcio.com</p>
+							<p>Your card was charged <strong>${formatPrice(doneState[1])}</strong>. If you have any questions, please send an email to oliviascards@mcurcio.com</p>
 						</div>
 					</div>
 				</div>
@@ -465,14 +466,20 @@ function Page(params) {
 									})}
 
 									<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
-										<div className="col-sm-3 offset-sm-5 text-right">Shipping</div>
+										<div className="col-sm-8 text-right">Shipping* ($5/box)</div>
 										<div className="col-sm-4" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
 									</div>
-									<div className="form-group row">
+									<div className="form-group row" style={{marginBottom: 0}}>
 										<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4 text-right">Shipping Code</label>
 
 										<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
 											<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
+										</div>
+									</div>
+									<div className="row">
+										<div className="col text-right text-muted" style={{fontSize: '0.7em'}}>
+											<p style={{marginBottom: 0}}>* Cards will be shipped without decorative boxes</p>
+											<p style={{marginBottom: 0}}>Sorry, we can't compete with Amazon delivery prices!</p>
 										</div>
 									</div>
 
@@ -635,11 +642,16 @@ function Page(params) {
 		<div data-spy="scroll" data-target="navbar" data-offset="0">
 			<div className="container">
 				<div className="row">
-				<div className="col col-8 offset-2">
+				<div className="col col-md-8 offset-md-2">
 				<blockquote className="blockquote" style={{marginTop: '3em'}}>
+					<p className="mb-0" style={{marginTop: '1em'}}>Our daughter, Olivia, would have been 5 years old on August 11, 2020 and entering kindergarten for the first time this year.</p>
+
 					<p className="mb-0" style={{marginTop: '1em'}}>Thank you for being a part of creating a legacy for our Olivia. As her parents, it is our desire to transform pain and loss into a legacy of love &mdash; love that hopes, love that perseveres.</p>
 
-					<p className="mb-0" style={{marginTop: '1em'}}>If you are not able to purchase a card box at this time, please <a href="https://sacloaves.org/donate.php">consider a donation</a>. Every dollar will contribute to bringing hope and resources for homeless children and their families to persevere.</p>
+					<p className="mb-0" style={{marginTop: '1em'}}>If you are not able to purchase a card box at this time, please <a href="#cart">consider a donation</a>. Every dollar will contribute to bringing hope and resources for homeless children and their families to persevere.</p>
+
+					<p style={{marginTop: '1em'}}>If you have any questions, please send an email to oliviascards@mcurcio.com</p>
+
 					<footer className="blockquote-footer" style={{marginTop: '1em'}}>With deepest gratitude, <cite title="Celeste & Matt Curcio">Celeste &amp; Matt Curcio</cite></footer>
 				</blockquote>
 				</div>
@@ -648,13 +660,13 @@ function Page(params) {
 				<h1 style={{marginTop: '1em', marginBottom: '1em'}}>Olivia's Cards for Mustard Seed</h1>
 
 				<div className="row justify-content-center">
-					<div className="col-8">
+					<div className="col-md-8">
 						<blockquote className="blockquote" style={{fontSize: '1em'}}>
 							<p className="lead" style={{fontSize: '1em'}}>Do you know someone who needs a smile? Me too. With COVID cases on the rise, this seems like the perfect time to deliver a socially distant hug via a card!</p>
 
-							<p className="lead" style={{fontSize: '1em'}}>For ${formatPrice(PRICE_PER_BOX)} you will receive 30 or more high quality hand-crafted cards in a beautiful storage box. Adorable AND functional AND to help children in our community? Yes please!</p>
+							<p className="lead" style={{fontSize: '1em'}}>For ${formatPrice(PRICE_PER_BOX)} you will receive 30 or more high quality hand-crafted or printed cards in a beautiful storage box. Adorable AND functional AND to help children in our community? Yes please!</p>
 
-							<p>At least <strong>$13 of each box sold will go towards meeting the needs of Mustard Seed classes.</strong></p>
+							<p>At least <strong>$13 of each box sold will go towards meeting the needs of Mustard Seed classes</strong>.</p>
 
 							<p style={{display: 'none'}}>All you need to do is use the link below to select which box(es) you’d like to purchase. If you live locally, I will deliver your purchase to your door. Talk about full service! If you live further away, I can ship your cards without the decorative box.</p>
 

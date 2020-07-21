@@ -111,7 +111,7 @@ module.exports.handler = async function(event, context) {
 					price_data: {
 						currency: 'usd',
 						product: PRODUCTS.shipping,
-						unit_amount: 1000 + (500 * (boxCount-1))
+						unit_amount: 500 * boxCount
 					}
 				});
 			}
