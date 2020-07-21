@@ -626,7 +626,7 @@ function Page(params) {
 		}
 	}
 
-	//const buildings = getImage("buildings");
+	const buildings = getImage("buildings");
 	//console.log("buildings", buildings);
 
 	return <>
