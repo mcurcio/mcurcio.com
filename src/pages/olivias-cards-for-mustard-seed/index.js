@@ -626,6 +626,9 @@ function Page(params) {
 		}
 	}
 
+	//const buildings = getImage("buildings");
+	//console.log("buildings", buildings);
+
 	return <>
 		<Helmet>
 			<title>Olivia's Cards for Mustard Seed School</title>
@@ -635,6 +638,11 @@ function Page(params) {
 			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 */}
+
+			<meta property="og:title" content="Olivias Cards for Mustard Seed School" />
+			<meta property="og:url" content="https://mcurcio.com/olivias-cards-for-mustard-seed/" />
+			<meta property="og:image" content={buildings.fluid.src} />
+
 		</Helmet>
 
 		<Header params={params} boxCount={getTotalBoxCount()} className='sticky-top' />
