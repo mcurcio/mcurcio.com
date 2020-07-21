@@ -354,12 +354,25 @@ function Page(params) {
 	}
 
 	function setStep(value) {
+
+		if (value) {
+			// "Proceed to checkout"
+
+			ga('send', 'event', 'cart', 'finalize', 'Olivias Cards');
+		} else {
+			// "Back to cart"
+
+			ga('send', 'event', 'cart', 'edit', 'Olivias Cards');
+		}
+
 		setInfoValue('cc', false);
 		setStepData(value);
 	}
 
 	function doCheckout(e) {
 		console.log('checkout', e);
+
+		ga('send', 'event', 'cart', 'checkout', 'Olivias Cards');
 
 		setProcessing(true);
 		setError(false);
@@ -411,15 +424,18 @@ function Page(params) {
 			.catch(err => {
 				setError(true);
 				console.error('promise error', err);
+				ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
 			})
 			.then(() => {
 				setProcessing(false);
+				ga('send', 'event', 'checkout', 'complete', 'Olivias Cards');
 			});
 		} catch (err) {
 			console.error('doCheckout error', err);
 
 			setProcessing(false);
 			setError(true);
+			ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
 		}
 	}
 
