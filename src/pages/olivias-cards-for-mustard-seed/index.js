@@ -17,6 +17,7 @@ import sha512 from 'js-sha512';
 import * as Yup from 'yup';
 import * as cardValidator from 'card-validator';
 import * as Sentry from '@sentry/browser';
+import * as currency from 'currency.js';
 //import { OLIVIAS_CARDS_STRIPE_PUBLIC } from "gatsby-env-variables"
 //window.sha512 = sha512;
 
@@ -335,14 +336,16 @@ function Page(params) {
 
 		BOXES.forEach(box => subtotal += box.getSubtotal());
 
-		const [donationDollars, donationCents] = cart.donation.replace(/[^\d\.]/g, '').split('.');
+		subtotal += currency(cart.donation).intValue;
+		/*const [donationDollars, donationCents] = cart.donation.replace(/[^\d\.]/g, '').split('.');
 		console.log('donationParts', donationDollars, donationCents);
+
 		if (donationDollars) {
 			subtotal += parseInt(donationDollars, 10) * 100;
 		}
 		if (donationCents) {
 			subtotal += parseInt(donationCents.padEnd(2, '0'), 10);
-		}
+		}*/
 		//subtotal += parseInt(cart.donation.replace('.', '').padEnd(3, '0'), 10);
 		console.log('subtotal', subtotal);
 
@@ -409,7 +412,7 @@ function Page(params) {
 				const payload = {
 					token: tokenId,
 					boxes: {},
-					donation: formatPrice(cart.donation),
+					donation: cart.donation,
 					coupon: cart.coupon,
 					name: info['name'],
 					email: info['email'],
@@ -441,7 +444,9 @@ function Page(params) {
 				console.log('response data', data);
 
 				if (!data.success) {
-					throw data;
+					const err = new Error('Server error');
+					err.data = data;
+					throw err;
 				}
 
 				setDoneState([true, data.amount]);
@@ -459,8 +464,8 @@ function Page(params) {
 				let error = true;
 				if (err.code && err.code === 'card_error') {
 					error = err.message;
-				} else if (err.rawType && err.rawType === 'card_error') {
-					error = err.raw.message;
+				} else if (err.data && err.data.rawType && err.data.rawType === 'card_error') {
+					error = err.data.raw.message;
 				}
 
 				console.error('setting error', error);

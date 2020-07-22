@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.OLIVIAS_CARDS_STRIPE_PRIVATE);
 const crypto = require('crypto');
 const Sentry = require('@sentry/node');
+const currency = require('currency.js');
 
 Sentry.init({ dsn: 'https://56c57ce9b15f4db6b408a0bfa96b27e1@o423520.ingest.sentry.io/5353905' });
 
@@ -79,7 +80,7 @@ module.exports.handler = async function(event, context) {
 			}
 		}));
 
-		const donation = parseInt(payload.donation.replace(/[^\d]/g, ''), 10);
+		const donation = currency(payload.donation).intValue;//parseInt(payload.donation.replace(/[^\d]/g, ''), 10);
 		if (donation > 0) {
 			await stripe.invoiceItems.create({
 				customer: customer.id,
@@ -94,7 +95,7 @@ module.exports.handler = async function(event, context) {
 
 		if (boxCount > 0) {
 			const hash = crypto.createHash('sha512');
-			hash.update(payload.coupon);
+			hash.update(payload.coupon.trim().toLowerCase());
 			if (hash.digest('hex') === process.env.GATSBY_OLIVIAS_CARDS_FREE_DELIVERY_HASH) {
 				await stripe.invoiceItems.create({
 					customer: customer.id,
