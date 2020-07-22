@@ -404,7 +404,9 @@ function Page(params) {
 
 				if (res.error) {
 					console.log('token error', res.error);
-					throw new Error(res.error);
+					const err = new Error('Token error');
+					err.data = res.error;
+					throw err;
 				}
 
 				const {token} = res;
