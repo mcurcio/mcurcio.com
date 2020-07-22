@@ -1,9 +1,10 @@
 ---
-title: Job Hunting
-date: 2020-07-13T13:54:00.000Z
-description: I am looking for a new job! It may not the optimal time in the Age of Corona, but I am not fully satisfied and looking for new challenges.
+title: Stripe Integration with Netlify and Gatsby
+date: 2020-07-16T19:49:00.000Z
+description:
 featuredpost: true
 featuredimage: header.jpg
+draft: true
 tags:
   - job search
 ---
