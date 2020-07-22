@@ -258,6 +258,9 @@ function Page(params) {
 	const [isProcessing, setProcessing] = useState(false);
 	const [doneState, setDoneState] = useState([false, 0]);
 	const [isError, setError] = useState(false);
+	const [isReady, setReady] = useState(false);
+
+	stripePromise.then(() => setReady(true));
 
 	const stripe = useStripe();
 	const elements = useElements();
@@ -393,11 +396,18 @@ function Page(params) {
 			console.log('card', element);
 
 			stripe.createToken(element)
-			.then(({token}) => {
-				console.log('token', token);
+			.then((res) => {
+				console.log('token', res);
+
+				if (res.error) {
+					throw new Error(res.error);
+				}
+
+				const {token} = res;
+				const tokenId = token.id;
 
 				const payload = {
-					token: token.id,
+					token: tokenId,
 					boxes: {},
 					donation: formatPrice(cart.donation),
 					coupon: cart.coupon,
@@ -429,18 +439,33 @@ function Page(params) {
 			})
 			.then(data => {
 				console.log('response data', data);
+
+				if (!data.success) {
+					throw data;
+				}
+
 				setDoneState([true, data.amount]);
 				setCart(BOXES.map(() => 0));
 			})
 			.catch(err => {
+				console.error('promise error', err);
+
 				if (typeof(err) === 'string') {
 					Sentry.captureMessage(err);
 				} else {
 					Sentry.captureException(err);
 				}
 
-				setError(true);
-				console.error('promise error', err);
+				let error = true;
+				if (err.code && err.code === 'card_error') {
+					error = err.message;
+				} else if (err.rawType && err.rawType === 'card_error') {
+					error = err.raw.message;
+				}
+
+				console.error('setting error', error);
+				setError(error);
+
 				recordEvent('checkout', 'error');
 				//ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
 			})
@@ -466,207 +491,226 @@ function Page(params) {
 	}
 
 	let footer = '';
-	if (doneState[0]) {
+	if (!isReady) {
 		footer = <div style={{background: '#eee'}}>
 			<div className="container">
 				<div className="row" style={{paddingTop: '2em'}}>
 					<div className="col-8 offset-2">
-						<div className="alert alert-success" role="alert">
-							<h4 class="alert-heading">Order complete!</h4>
+						<div className="alert alert-info" role="alert">
+							<h4 className="alter-heading">Loading order form</h4>
 
-							<p>Your card was charged <strong>${formatPrice(doneState[1])}</strong>. If you have any questions, please send an email to oliviascards@mcurcio.com</p>
+							<p>If the form is not loading, please try to reload the page. If that doesn't resolve the issue, contact us at oliviascards@mcurcio.com for help.</p>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>;
 	} else {
-		if (step === false) {
-			footer = <div style={{background: '#eee'}}>
-						<div className="container">
-							<div className="row">
-								<div className="col">
-									<h2 id="cart" className="text-center">Cart</h2>
-								</div>
-							</div>
-
-							<div className="row">
-								<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
-
-
-
-
-									{BOXES.map((box, iteration) => {
-										return <div key={box.key} className={`form-group row`} style={{marginBottom: 0}}>
-											<label htmlFor={`box${box.key}`} className="col-6 col-form-label">{box.title}</label>
-											<div className="col-3">
-												<input type="number" className="form-control" id={`box${box.key}`} value={box.getCount()} onChange={(e) => box.setCount(e.target.value)} />
-											</div>
-											<div className="col-form-label col-3" style={{textAlign: 'right'}}>${formatPrice(box.getSubtotal())}</div>
-
-										</div>;
-									})}
-
-									<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
-										<div className="col-sm-8 text-right">Shipping* ($5/box)</div>
-										<div className="col-sm-4" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
-									</div>
-									<div className="form-group row" style={{marginBottom: 0}}>
-										<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4 text-right">Shipping Code</label>
-
-										<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
-											<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
-										</div>
-									</div>
-									<div className="row">
-										<div className="col text-right text-muted" style={{fontSize: '0.7em'}}>
-											<p style={{marginBottom: 0}}>* Cards will be shipped without decorative boxes</p>
-											<p style={{marginBottom: 0}}>Sorry, we can't compete with Amazon delivery prices!</p>
-										</div>
-									</div>
-
-									<div className="form-group row" style={{marginTop: '2em'}}>
-										<label htmlFor="donation" className="col-md-8 col-form-label text-right">Donate to Mustard Seed School</label>
-
-										<div className="col-md-4 input-group">
-											<div className="input-group-prepend">
-												<span className="input-group-text">$</span>
-											</div>
-											<input id="donation" type="text" className="form-control" style={{textAlign: 'right'}} value={cart.donation} onChange={e => setDonation(e.target.value)} />
-										</div>
-									</div>
-
-									<div className="row">
-										<div className="col-sm-3 offset-sm-5 text-right">Total</div>
-										<div className="col-sm-4 text-right">${formatPrice(getSubtotal())}</div>
-									</div>
-
-									<div className="row">
-										<div className="col">
-											<button type="button" className="btn btn-primary btn-block" onClick={() => setStep(true)} disabled={getSubtotal()===0}>Proceed to Checkout</button>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-			</div>;
-		} else {
-			const validateClassName = (VALIDATION, key) => {
-				const value = info[key];
-				if (value.trim().length !== 0) {
-					return VALIDATION.isValidSync(value) ? 'is-valid' : 'is-invalid';
-				}
-			}
-
+		if (doneState[0]) {
 			footer = <div style={{background: '#eee'}}>
 				<div className="container">
-					<div className="row">
-						<div className="col">
-							<h2 id="cart" className="text-center">Checkout</h2>
-						</div>
-					</div>
+					<div className="row" style={{paddingTop: '2em'}}>
+						<div className="col-8 offset-2">
+							<div className="alert alert-success" role="alert">
+								<h4 className="alert-heading">Order complete!</h4>
 
-					<div className="row">
-						<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
-
-
-
-						<div className="form-row">
-							<h3 style={{paddingTop: 0}}>Contact Info</h3>
-						</div>
-
-
-
-						<div className="form-row" style={{marginBottom: '0.5em'}}>
-							<div className="col-12">
-								<input type="text" className={`form-control ${validateClassName(NAME_VALIDATION, 'name')}`} placeholder="Name *" value={info['name']} onChange={(e) => setInfoValue('name', e.target.value)} onFocus={e => setInfoValue('focus', 'name')}  />
+								<p>Your card was charged <strong>${formatPrice(doneState[1])}</strong>. If you have any questions, please send an email to oliviascards@mcurcio.com</p>
 							</div>
-						</div>
-
-						<div className="form-row">
-							<div className="col-12">
-								<input type="email" className={`form-control ${validateClassName(EMAIL_VALIDATION, 'email')}`} placeholder="Email *" value={info['email']} onChange={(e) => setInfoValue('email', e.target.value)} />
-							</div>
-						</div>
-
-	<div className="form-row" style={{marginTop: '0em'}}>
-		<h3>Shipping Info</h3>
-	</div>
-
-
-
-		<div className="form-row" style={{marginBottom: '0.5em'}}>
-			<div className="col-12">
-				<input type="text" className={`form-control ${validateClassName(ADDRESS_VALIDATION, 'address')}`} placeholder="Address *" value={info['address']} onChange={(e) => setInfoValue('address', e.target.value)} />
-			</div>
-		</div>
-
-	  <div className="form-row">
-		<div className="col-7">
-		  <input type="text" className={`form-control ${validateClassName(CITY_VALIDATION, 'city')}`} placeholder="City *" value={info['city']} onChange={(e) => setInfoValue('city', e.target.value)} />
-		</div>
-		<div className="col">
-		  <input type="text" className={`form-control ${validateClassName(STATE_VALIDATION, 'state')}`} placeholder="State *" value={info['state']} onChange={(e) => setInfoValue('state', e.target.value)} />
-		</div>
-		<div className="col">
-		  <input type="text" className={`form-control ${validateClassName(ZIP_VALIDATION, 'zip')}`} placeholder="Zip *" value={info['zip']} onChange={(e) => setInfoValue('zip', e.target.value)} />
-		</div>
-	  </div>
-
-		<div className="form-row" style={{marginTop: '0em'}}>
-			<h3>Payment</h3>
-		</div>
-
-	  <div className="form-row">
-	  	<div className="col">
-				<CardElement className="form-control" onChange={e => setInfoValue('cc', e.complete)} options={{
-					hidePostalCode: true,
-					classes: {
-						base: 'form-control',
-						complete: 'is-valid',
-						invalid: 'is-invalid',
-					},
-					style: {
-						base: {
-							display: 'block',
-							width: '100%',
-							height: '38px',
-							padding: '6px 12px',
-							fontSize: '16px',
-							fontWeight: 400,
-							lineHeight: '24px',
-							color: '#495057',
-							backgroundColor: '#fff',
-							backgroundClip: 'padding-box',
-							border: '1px solid #ced4da',
-							borderRadius: '4px',
-							transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-						},
-
-					}
-				}} />
-		</div>
-	  </div>
-
-	<button type="button" className="btn btn-primary btn-block" disabled={!isCheckoutValid || isProcessing} onClick={doCheckout} style={{marginTop: '2em'}}>Checkout &mdash; ${formatPrice(getSubtotal())}</button>
-	<button type="button" className="btn btn-link" onClick={() => setStep(false)}>Review Cart</button>
-
-		{isProcessing ?	<div className="alert alert-primary" role="alert">
-			Please wait, your order is being processed <div class="spinner-border" role="status" style={{width: '1em', height: '1em'}}>
-  <span className="sr-only">Loading...</span>
-</div>
-		</div> : ''}
-
-		{isError ?	<div className="alert alert-danger" role="alert">
-			Something went wrong. If you are unable to complete checkout, please contact us at oliviascards@mcurcio.com
-		</div> : ''}
-
 						</div>
 					</div>
 				</div>
 			</div>;
+		} else {
+			if (step === false) {
+				footer = <div style={{background: '#eee'}}>
+							<div className="container">
+								<div className="row">
+									<div className="col">
+										<h2 id="cart" className="text-center">Cart</h2>
+									</div>
+								</div>
+
+								<div className="row">
+									<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
+
+
+
+
+										{BOXES.map((box, iteration) => {
+											return <div key={box.key} className={`form-group row`} style={{marginBottom: 0}}>
+												<label htmlFor={`box${box.key}`} className="col-6 col-form-label">{box.title}</label>
+												<div className="col-3">
+													<input type="number" className="form-control" id={`box${box.key}`} value={box.getCount()} onChange={(e) => box.setCount(e.target.value)} />
+												</div>
+												<div className="col-form-label col-3" style={{textAlign: 'right'}}>${formatPrice(box.getSubtotal())}</div>
+
+											</div>;
+										})}
+
+										<div className="row" style={{marginTop: '2em', marginBottom: '0.5em'}}>
+											<div className="col-sm-8 text-right">Shipping* ($5/box)</div>
+											<div className="col-sm-4" style={{textAlign: 'right'}}>${formatPrice(getShipping())}</div>
+										</div>
+										<div className="form-group row" style={{marginBottom: 0}}>
+											<label htmlFor="coupon" className="col-sm-4 col-form-label offset-sm-4 text-right">Shipping Code</label>
+
+											<div className="col-sm-4 input-group" style={{textAlign: 'right'}}>
+												<input id="coupon" type="text" className="form-control" value={cart.coupon} onChange={e => setCoupon(e.target.value)} />
+											</div>
+										</div>
+										<div className="row">
+											<div className="col text-right text-muted" style={{fontSize: '0.7em'}}>
+												<p style={{marginBottom: 0}}>* Cards will be shipped without decorative boxes</p>
+												<p style={{marginBottom: 0}}>Sorry, we can't compete with Amazon delivery prices!</p>
+											</div>
+										</div>
+
+										<div className="form-group row" style={{marginTop: '2em'}}>
+											<label htmlFor="donation" className="col-md-8 col-form-label text-right">Donate to Mustard Seed School</label>
+
+											<div className="col-md-4 input-group">
+												<div className="input-group-prepend">
+													<span className="input-group-text">$</span>
+												</div>
+												<input id="donation" type="text" className="form-control" style={{textAlign: 'right'}} value={cart.donation} onChange={e => setDonation(e.target.value)} />
+											</div>
+										</div>
+
+										<div className="row">
+											<div className="col-sm-3 offset-sm-5 text-right">Total</div>
+											<div className="col-sm-4 text-right">${formatPrice(getSubtotal())}</div>
+										</div>
+
+										<div className="row">
+											<div className="col">
+												<button type="button" className="btn btn-primary btn-block" onClick={() => setStep(true)} disabled={getSubtotal()===0}>Proceed to Checkout</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+				</div>;
+			} else {
+				const validateClassName = (VALIDATION, key) => {
+					const value = info[key];
+					if (value.trim().length !== 0) {
+						return VALIDATION.isValidSync(value) ? 'is-valid' : 'is-invalid';
+					}
+				}
+
+				footer = <div style={{background: '#eee'}}>
+					<div className="container">
+						<div className="row">
+							<div className="col">
+								<h2 id="cart" className="text-center">Checkout</h2>
+							</div>
+						</div>
+
+						<div className="row">
+							<div className="col-12 col-lg-6 offset-lg-3 rounded" style={{background: '#fff', padding: '3em', marginBottom: '3em'}}>
+
+
+
+							<div className="form-row">
+								<h3 style={{paddingTop: 0}}>Contact Info</h3>
+							</div>
+
+
+
+							<div className="form-row" style={{marginBottom: '0.5em'}}>
+								<div className="col-12">
+									<input type="text" className={`form-control ${validateClassName(NAME_VALIDATION, 'name')}`} placeholder="Name *" value={info['name']} onChange={(e) => setInfoValue('name', e.target.value)} onFocus={e => setInfoValue('focus', 'name')}  />
+								</div>
+							</div>
+
+							<div className="form-row">
+								<div className="col-12">
+									<input type="email" className={`form-control ${validateClassName(EMAIL_VALIDATION, 'email')}`} placeholder="Email *" value={info['email']} onChange={(e) => setInfoValue('email', e.target.value)} />
+								</div>
+							</div>
+
+		<div className="form-row" style={{marginTop: '0em'}}>
+			<h3>Shipping Info</h3>
+		</div>
+
+
+
+			<div className="form-row" style={{marginBottom: '0.5em'}}>
+				<div className="col-12">
+					<input type="text" className={`form-control ${validateClassName(ADDRESS_VALIDATION, 'address')}`} placeholder="Address *" value={info['address']} onChange={(e) => setInfoValue('address', e.target.value)} />
+				</div>
+			</div>
+
+		  <div className="form-row">
+			<div className="col-7">
+			  <input type="text" className={`form-control ${validateClassName(CITY_VALIDATION, 'city')}`} placeholder="City *" value={info['city']} onChange={(e) => setInfoValue('city', e.target.value)} />
+			</div>
+			<div className="col">
+			  <input type="text" className={`form-control ${validateClassName(STATE_VALIDATION, 'state')}`} placeholder="State *" value={info['state']} onChange={(e) => setInfoValue('state', e.target.value)} />
+			</div>
+			<div className="col">
+			  <input type="text" className={`form-control ${validateClassName(ZIP_VALIDATION, 'zip')}`} placeholder="Zip *" value={info['zip']} onChange={(e) => setInfoValue('zip', e.target.value)} />
+			</div>
+		  </div>
+
+			<div className="form-row" style={{marginTop: '0em'}}>
+				<h3>Payment</h3>
+			</div>
+
+		  <div className="form-row">
+		  	<div className="col">
+					<CardElement className="form-control" onChange={e => setInfoValue('cc', e.complete)} options={{
+						hidePostalCode: true,
+						classes: {
+							base: 'form-control',
+							complete: 'is-valid',
+							invalid: 'is-invalid',
+						},
+						style: {
+							base: {
+								display: 'block',
+								width: '100%',
+								height: '38px',
+								padding: '6px 12px',
+								fontSize: '16px',
+								fontWeight: 400,
+								lineHeight: '24px',
+								color: '#495057',
+								backgroundColor: '#fff',
+								backgroundClip: 'padding-box',
+								border: '1px solid #ced4da',
+								borderRadius: '4px',
+								transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
+							},
+
+						}
+					}} />
+			</div>
+		  </div>
+
+		<button type="button" className="btn btn-primary btn-block" disabled={!isCheckoutValid || isProcessing} onClick={doCheckout} style={{marginTop: '2em'}}>Checkout &mdash; ${formatPrice(getSubtotal())}</button>
+		<button type="button" className="btn btn-link" onClick={() => setStep(false)}>Review Cart</button>
+
+			{isProcessing ?	<div className="alert alert-primary" role="alert">
+				Please wait, your order is being processed <div className="spinner-border" role="status" style={{width: '1em', height: '1em'}}>
+	  <span className="sr-only">Loading...</span>
+	</div>
+			</div> : ''}
+
+			{isError ?	<div className="alert alert-danger" role="alert">
+				<p>{(typeof(isError)==='string') ? <p>{isError}</p> : 'Something went wrong'}</p>
+
+				<p>If you are unable to complete checkout, please contact us at oliviascards@mcurcio.com</p>
+
+			</div> : ''}
+
+							</div>
+						</div>
+					</div>
+				</div>;
+			}
 		}
-	}
+	} // isReady
 
 	const buildings = getImage("buildings");
 	//console.log("buildings", buildings);
