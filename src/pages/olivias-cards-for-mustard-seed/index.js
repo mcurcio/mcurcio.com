@@ -403,6 +403,7 @@ function Page(params) {
 				console.log('token', res);
 
 				if (res.error) {
+					console.log('token error', res.error);
 					throw new Error(res.error);
 				}
 
@@ -455,12 +456,6 @@ function Page(params) {
 			.catch(err => {
 				console.error('promise error', err);
 
-				if (typeof(err) === 'string') {
-					Sentry.captureMessage(err);
-				} else {
-					Sentry.captureException(err);
-				}
-
 				let error = true;
 				if (err.code && err.code === 'card_error') {
 					error = err.message;
@@ -470,6 +465,12 @@ function Page(params) {
 
 				console.error('setting error', error);
 				setError(error);
+
+				if (typeof(err) === 'string') {
+					Sentry.captureMessage(err);
+				} else {
+					Sentry.captureException(err);
+				}
 
 				recordEvent('checkout', 'error');
 				//ga('send', 'event', 'checkout', 'error', 'Olivias Cards');
