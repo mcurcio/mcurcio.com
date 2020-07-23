@@ -41,7 +41,7 @@ function PostDeck({posts}) {
 	console.log('PostDeck', posts);
 
 	return <div className="row postdeck">
-		{posts.map(post => <div className="col-4 align-items-stretch">
+		{posts.map(post => <div className="col-12 col-md-4 align-items-stretch">
 			<PostDeckCard post={post.node} />
 		</div>)}
 	</div>;
