@@ -398,7 +398,13 @@ function Page(params) {
 			const element = elements.getElement(CardElement);
 			console.log('card', element);
 
-			stripe.createToken(element)
+			stripe.createToken(element, {
+				name: info['name'],
+				address_line_1: info['address'],
+				address_city: info['city'],
+				address_state: info['state'],
+				address_zip: info['zip'],
+			})
 			.then((res) => {
 				console.log('token', res);
 
