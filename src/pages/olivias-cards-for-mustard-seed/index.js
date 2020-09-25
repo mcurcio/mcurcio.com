@@ -755,6 +755,11 @@ function Page(params) {
 			<div className="container">
 				<div className="row">
 				<div className="col col-md-8 offset-md-2">
+
+				<div class="alert alert-primary" role="alert" style={{margin:'3em 0'}}>
+				The fundraiser is now over. Thanks to everyone who purchased cards and donated, we were able to raise over $2,500 for Mustard Seed School!
+				</div>
+
 				<blockquote className="blockquote" style={{marginTop: '3em'}}>
 					<p className="mb-0" style={{marginTop: '1em'}}>Our daughter, Olivia, would have been 5 years old on August 11, 2020 and entering kindergarten for the first time this year.</p>
 
@@ -814,8 +819,6 @@ function Page(params) {
 			{BOXES.map((box, iteration) => {
 				return <BoxDetails key={box.key} count={iteration} details={box} />
 			})}
-
-			{footer}
 		</div>
 	</>;
 }
