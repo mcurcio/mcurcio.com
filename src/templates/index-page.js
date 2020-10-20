@@ -7,6 +7,9 @@ import Features from '../components/Features'
 import BlogRoll from '../components/BlogRoll'
 import PreviewCompatibleImage from '../components/PreviewCompatibleImage';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowDown } from '@fortawesome/free-solid-svg-icons'
+
 import _ from 'lodash';
 
 //import '../../styles/style.scss'
@@ -49,10 +52,20 @@ function PostDeck({posts}) {
 
 function Hero() {
 	return <section id="hero" className="jumbotron">
-		<h1 className="title">
+		<h1 className="title" style={{width: '100%', marginBottom: 0}}>
 			Hi, my name is <span className="text-color-primary">Matt</span>
 			<br />
 			and I like to automate <em>everything</em>
+
+			<div style={{position: 'relative', fontSize: '1em'}}>
+				<FontAwesomeIcon icon={faArrowDown} class="hero-arrow" style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					right: 0,
+					margin: '0 auto',
+				}} />
+			</div>
 		</h1>
 	</section>;
 }

@@ -33,6 +33,50 @@ section#hero {
 			-webkit-text-fill-color: transparent;
 		}
 
+		.hero-arrow {
+			width: 30px;
+			//-webkit-animation: hero-arrow 1s 0s 1;
+			animation: hero-arrow 3s 2s both, hero-arrow-bounce 2s 10s infinite;
+			top: 50vh;
+			//opacity: 0;
+		}
+
+		@-webkit-keyframes hero-arrow {
+		  0% {
+		    top: 50vh;
+			opacity: 0;
+		  }
+		  100% {
+		    top: 5vh;
+			opacity: 1;
+		  }
+		}
+		@keyframes hero-arrow {
+		  0% {
+		   top: 50vh;
+		   opacity: 0;
+		  }
+		  50% {
+			  top: 30vh;
+			  opacity: 0;
+		  }
+		  100% {
+		    top: 5vh;
+			opacity: 1;
+		  }
+		}
+		@keyframes hero-arrow-bounce {
+			0% {
+				top: 5vh;
+			}
+			50% {
+				top: 6vh;
+			}
+			100% {
+				top: 5vh;
+			}
+		}
+
 		@include respond(tab-land) {
 	      font-size: 2.6rem;
 	    }

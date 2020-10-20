@@ -6,3 +6,10 @@
   NODE_VERSION = "12"
 #  YARN_VERSION = "1.22.4"
 #  YARN_FLAGS = "--no-ignore-optional"
+[[redirects]]
+  from = "/affiliate/amazon/*"
+  to = "/.netlify/functions/amazon_redirect"
+  status = 200
+  #force = true # COMMENT: ensure that we always redirect
+  #headers = {X-From = "Netlify"}
+  #signed = "API_SIGNATURE_TOKEN"
