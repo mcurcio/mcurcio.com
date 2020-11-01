@@ -14,20 +14,23 @@ export const BlogPostTemplate = ({
   description,
   tags,
   title,
-  affiliate,
   helmet,
   featuredimage
 }) => {
   const PostContent = contentComponent || Content
 
-	const hasAffiliate = affiliate && affiliate.length;
-
   return (
     <div className="container">
       {helmet || ''}
       <div className="row">
-	  	<div className="column">
-			<Link href="/">Back</Link>
+	  	<div className="column col-2 col-sm-1">
+			<p><Link href="/">Back</Link></p>
+		</div>
+
+		<div className="column">
+			<p>
+				This site is supported by readers. When you buy through links on our site, we may earn an affiliate commission. <a href="/terms-of-service">Learn more</a>.
+			</p>
 		</div>
 	</div>
 
@@ -47,7 +50,7 @@ export const BlogPostTemplate = ({
             <h1 className="title is-size-2 has-text-weight-bold is-bold-light">
               {title}
             </h1>
-			{hasAffiliate? <p>Here be affiliate links</p> :''}
+
             <p>{description}</p>
             <PostContent content={content} />
             {tags && tags.length ? (
