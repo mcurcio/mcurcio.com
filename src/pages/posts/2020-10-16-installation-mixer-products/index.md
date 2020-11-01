@@ -2,7 +2,7 @@
 title: Home Audio Technology Stack
 date: 2020-10-16T16:24:00.000Z
 featuredpost: true
-featuredimage: /img/310281.jpg
+featuredimage: header.jpg
 description: Whole home audio routing with off-the-shelf equipment.
 affiliate: amazon
 tags:
