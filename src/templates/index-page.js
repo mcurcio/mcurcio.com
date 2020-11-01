@@ -58,13 +58,13 @@ function Hero() {
 			and I like to automate <em>everything</em>
 
 			<div style={{position: 'relative', fontSize: '1em'}}>
-				<FontAwesomeIcon icon={faArrowDown} class="hero-arrow" style={{
+				<a href="#articles"><FontAwesomeIcon icon={faArrowDown} class="hero-arrow" style={{
 					position: 'absolute',
 					top: 0,
 					left: 0,
 					right: 0,
 					margin: '0 auto',
-				}} />
+				}} /></a>
 			</div>
 		</h1>
 	</section>;
@@ -82,6 +82,8 @@ export const IndexPageTemplate = ({
 }) => (<>
 
 	{/*console.log('entries', Object.entries(posts))*/}
+
+	<a name="articles"></a>
 
 	<div className="container py-5">
 		<div className="row">

@@ -50,9 +50,9 @@ const Navbar = class extends React.Component {
     		</button>
     		<div className="collapse navbar-collapse" id="navbarText">
     			<ul className="navbar-nav mr-auto mt-2 mt-lg-0">
-    				{/*}<li className="nav-item active">
-    					<a className="nav-link" href="/posts">Blog <span className="sr-only">(current)</span></a>
-    				</li>*/}
+    				<li className="nav-item active">
+    					<a className="nav-link" href="/#articles">Articles <span className="sr-only">(current)</span></a>
+    				</li>
     			</ul>
 				<ul className="navbar-nav ml-auto">
 		            <li className="nav-item">

@@ -12,7 +12,9 @@ const Footer = class extends React.Component {
   render() {
     return (
       <footer className="container py-5">
-
+	  <div className="content has-text-centered">
+	  	<p>&copy; 2020 Frigid Media LLC <a href="/privacy-policy">Privacy Policy</a> <a href="/terms-of-service">Terms of Service</a></p>
+	</div>
 	  </footer>
     )
   }

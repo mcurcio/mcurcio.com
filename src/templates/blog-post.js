@@ -14,10 +14,13 @@ export const BlogPostTemplate = ({
   description,
   tags,
   title,
+  affiliate,
   helmet,
   featuredimage
 }) => {
   const PostContent = contentComponent || Content
+
+	const hasAffiliate = affiliate && affiliate.length;
 
   return (
     <div className="container">
@@ -44,6 +47,7 @@ export const BlogPostTemplate = ({
             <h1 className="title is-size-2 has-text-weight-bold is-bold-light">
               {title}
             </h1>
+			{hasAffiliate? <p>Here be affiliate links</p> :''}
             <p>{description}</p>
             <PostContent content={content} />
             {tags && tags.length ? (
@@ -112,6 +116,7 @@ export const pageQuery = graphql`
         title
         description
         tags
+		affiliate
 		featuredimage {
           childImageSharp {
             fluid(maxWidth: 1140, maxHeight: 400, quality: 100) {
