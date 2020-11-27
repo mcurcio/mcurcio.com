@@ -1,5 +1,5 @@
 const PREFIX = '/affiliate/amazon/';
-const TAG = 'mcurcio-20';
+const TAG = 'mcurcio02-20';
 
 module.exports.handler = async function(event, context) {
 	console.log("event", event)
