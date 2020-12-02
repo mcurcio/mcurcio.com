@@ -11,6 +11,8 @@ import PreviewCompatibleImage from '../components/PreviewCompatibleImage';
 export const BlogPostTemplate = ({
   content,
   contentComponent,
+  date,
+  humanDate,
   description,
   tags,
   title,
@@ -24,18 +26,18 @@ export const BlogPostTemplate = ({
       {helmet || ''}
       <div className="row">
 	  	<div className="column col-2 col-sm-1">
-			<p><Link href="/">Back</Link></p>
+			<p style={{margin: 0}}><Link href="/">Back</Link></p>
 		</div>
 
 		<div className="column">
-			<p>
-				This site is supported by readers. When you buy through links on our site, we may earn an affiliate commission. <a href="/terms-of-service">Learn more</a>.
+			<p style={{margin: 0}}>
+				We may earn money if you buy through links on this site. <a href="/terms-of-service">Learn more</a>.
 			</p>
 		</div>
 	</div>
 
 	<div className="row">
-        <div className="column">
+        <div className="column" style={{padding: 0}}>
 			<PreviewCompatibleImage
 			  imageInfo={{
 				image: featuredimage,
@@ -49,6 +51,7 @@ export const BlogPostTemplate = ({
 		<div className="column col-md-8 offset-md-2">
             <h1 className="title is-size-2 has-text-weight-bold is-bold-light">
               {title}
+              <small className="text-muted"><time datetime={date} style={{display: 'block', fontSize: '1rem'}}>{humanDate}</time></small>
             </h1>
 
             <p>{description}</p>
@@ -83,6 +86,8 @@ const BlogPost = ({ data }) => {
       <BlogPostTemplate
         content={post.html}
         contentComponent={HTMLContent}
+        date={post.frontmatter.date}
+        humanDate={post.frontmatter.humanDate}
         description={post.frontmatter.description}
         helmet={
           <Helmet titleTemplate="%s | Blog">
@@ -115,7 +120,8 @@ export const pageQuery = graphql`
       id
       html
       frontmatter {
-        date(formatString: "MMMM DD, YYYY")
+        date
+        humanDate: date(formatString: "MMMM DD, YYYY")
         title
         description
         tags
